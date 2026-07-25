@@ -1,9 +1,20 @@
+import HomePage from "./pages/HomePage";
+import ListingPage from "./pages/ListingPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+
 export default function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900">
-      <h1 className="text-5xl font-bold text-pink-500">
-        StayNest
-      </h1>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#ffffff",
+      }}
+    >
+      <HomePage></HomePage>
+      <ListingPage></ListingPage>
+      <SignupPage></SignupPage>
+      <LoginPage></LoginPage>
     </div>
   );
 }
