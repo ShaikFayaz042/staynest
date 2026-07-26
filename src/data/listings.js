@@ -5950,6 +5950,1436 @@ const listings = [
     "bookingIds": [
       "bk75"
     ]
+  },
+  {
+    "id": "l76",
+    "hostId": "u13",
+    "title": "Luxury Penthouse in Connaught Place",
+    "description": "Experience the charm of a penthouse nestled in New Delhi, Delhi. Perfectly suited for 4 guests, this space offers 2 bedrooms, 3 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Penthouse",
+    "location": {
+      "country": "India",
+      "state": "Delhi",
+      "city": "New Delhi",
+      "address": "177 Connaught Place, New Delhi",
+      "latitude": "28.6139",
+      "longitude": "77.209"
+    },
+    "pricePerNight": 8000,
+    "guests": 4,
+    "bedroomsCount": 2,
+    "beds": 3,
+    "bathrooms": 2,
+    "rating": 4.7,
+    "reviewCount": 12,
+    "images": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l76-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l76-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r421", "r422", "r423"],
+    "bookingIds": ["bk76"]
+  },
+  {
+    "id": "l77",
+    "hostId": "u13",
+    "title": "Heritage Haveli in Old Delhi",
+    "description": "Experience the charm of a heritage haveli nestled in New Delhi, Delhi. Perfectly suited for 6 guests, this space offers 3 bedrooms, 4 beds and 3 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "House",
+    "location": {
+      "country": "India",
+      "state": "Delhi",
+      "city": "New Delhi",
+      "address": "178 Old Delhi Road, New Delhi",
+      "latitude": "28.6139",
+      "longitude": "77.209"
+    },
+    "pricePerNight": 4500,
+    "guests": 6,
+    "bedroomsCount": 3,
+    "beds": 4,
+    "bathrooms": 3,
+    "rating": 4.5,
+    "reviewCount": 8,
+    "images": [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l77-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l77-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l77-b3",
+        "title": "Bedroom 3",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Iron",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r424", "r425", "r426"],
+    "bookingIds": []
+  },
+  {
+    "id": "l78",
+    "hostId": "u13",
+    "title": "Modern Studio in Aerocity",
+    "description": "Experience the charm of a modern studio nestled in New Delhi, Delhi. Perfectly suited for 2 guests, this space offers 1 bedroom, 1 bed and 1 bathroom. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Delhi",
+      "city": "New Delhi",
+      "address": "179 Aerocity, New Delhi",
+      "latitude": "28.6139",
+      "longitude": "77.209"
+    },
+    "pricePerNight": 3500,
+    "guests": 2,
+    "bedroomsCount": 1,
+    "beds": 1,
+    "bathrooms": 1,
+    "rating": 4.8,
+    "reviewCount": 15,
+    "images": [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l78-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "TV",
+      "Coffee maker",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r427", "r428"],
+    "bookingIds": ["bk77"]
+  },
+  {
+    "id": "l79",
+    "hostId": "u13",
+    "title": "Spacious Villa in South Delhi",
+    "description": "Experience the charm of a villa nestled in New Delhi, Delhi. Perfectly suited for 8 guests, this space offers 4 bedrooms, 5 beds and 3 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "House",
+    "location": {
+      "country": "India",
+      "state": "Delhi",
+      "city": "New Delhi",
+      "address": "180 South Delhi Main Road",
+      "latitude": "28.6139",
+      "longitude": "77.209"
+    },
+    "pricePerNight": 12000,
+    "guests": 8,
+    "bedroomsCount": 4,
+    "beds": 5,
+    "bathrooms": 3,
+    "rating": 4.6,
+    "reviewCount": 9,
+    "images": [
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l79-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l79-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l79-b3",
+        "title": "Bedroom 3",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l79-b4",
+        "title": "Bedroom 4",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Iron",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r429", "r430", "r431"],
+    "bookingIds": ["bk78", "bk79"]
+  },
+  {
+    "id": "l80",
+    "hostId": "u13",
+    "title": "Cozy Loft in Hauz Khas",
+    "description": "Experience the charm of a loft nestled in New Delhi, Delhi. Perfectly suited for 3 guests, this space offers 1 bedroom, 2 beds and 1 bathroom. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Delhi",
+      "city": "New Delhi",
+      "address": "181 Hauz Khas, New Delhi",
+      "latitude": "28.6139",
+      "longitude": "77.209"
+    },
+    "pricePerNight": 5500,
+    "guests": 3,
+    "bedroomsCount": 1,
+    "beds": 2,
+    "bathrooms": 1,
+    "rating": 4.4,
+    "reviewCount": 5,
+    "images": [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l80-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r432", "r433"],
+    "bookingIds": []
+  },
+  {
+    "id": "l81",
+    "hostId": "u14",
+    "title": "Sea View Apartment in Bandra",
+    "description": "Experience the charm of a sea view apartment nestled in Mumbai, Maharashtra. Perfectly suited for 4 guests, this space offers 2 bedrooms, 3 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Mumbai",
+      "address": "182 Bandra West, Mumbai",
+      "latitude": "19.076",
+      "longitude": "72.8777"
+    },
+    "pricePerNight": 9500,
+    "guests": 4,
+    "bedroomsCount": 2,
+    "beds": 3,
+    "bathrooms": 2,
+    "rating": 4.9,
+    "reviewCount": 20,
+    "images": [
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l81-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l81-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r434", "r435", "r436"],
+    "bookingIds": ["bk80"]
+  },
+  {
+    "id": "l82",
+    "hostId": "u14",
+    "title": "Charming Bungalow in Juhu",
+    "description": "Experience the charm of a bungalow nestled in Mumbai, Maharashtra. Perfectly suited for 6 guests, this space offers 3 bedrooms, 4 beds and 3 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "House",
+    "location": {
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Mumbai",
+      "address": "183 Juhu Beach Road, Mumbai",
+      "latitude": "19.076",
+      "longitude": "72.8777"
+    },
+    "pricePerNight": 15000,
+    "guests": 6,
+    "bedroomsCount": 3,
+    "beds": 4,
+    "bathrooms": 3,
+    "rating": 4.7,
+    "reviewCount": 14,
+    "images": [
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l82-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l82-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l82-b3",
+        "title": "Bedroom 3",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Iron",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r437", "r438", "r439"],
+    "bookingIds": ["bk81"]
+  },
+  {
+    "id": "l83",
+    "hostId": "u14",
+    "title": "Compact Studio in Andheri",
+    "description": "Experience the charm of a compact studio nestled in Mumbai, Maharashtra. Perfectly suited for 2 guests, this space offers 1 bedroom, 1 bed and 1 bathroom. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Mumbai",
+      "address": "184 Andheri East, Mumbai",
+      "latitude": "19.076",
+      "longitude": "72.8777"
+    },
+    "pricePerNight": 3000,
+    "guests": 2,
+    "bedroomsCount": 1,
+    "beds": 1,
+    "bathrooms": 1,
+    "rating": 4.3,
+    "reviewCount": 6,
+    "images": [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l83-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "TV",
+      "Coffee maker",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r440", "r441"],
+    "bookingIds": []
+  },
+  {
+    "id": "l84",
+    "hostId": "u14",
+    "title": "Designer Loft in Lower Parel",
+    "description": "Experience the charm of a designer loft nestled in Mumbai, Maharashtra. Perfectly suited for 3 guests, this space offers 1 bedroom, 2 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Mumbai",
+      "address": "185 Lower Parel, Mumbai",
+      "latitude": "19.076",
+      "longitude": "72.8777"
+    },
+    "pricePerNight": 7000,
+    "guests": 3,
+    "bedroomsCount": 1,
+    "beds": 2,
+    "bathrooms": 2,
+    "rating": 4.6,
+    "reviewCount": 10,
+    "images": [
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l84-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r442", "r443", "r444"],
+    "bookingIds": ["bk82"]
+  },
+  {
+    "id": "l85",
+    "hostId": "u14",
+    "title": "Beachside Villa in Versova",
+    "description": "Experience the charm of a beachside villa nestled in Mumbai, Maharashtra. Perfectly suited for 8 guests, this space offers 4 bedrooms, 5 beds and 3 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "House",
+    "location": {
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Mumbai",
+      "address": "186 Versova Beach, Mumbai",
+      "latitude": "19.076",
+      "longitude": "72.8777"
+    },
+    "pricePerNight": 18000,
+    "guests": 8,
+    "bedroomsCount": 4,
+    "beds": 5,
+    "bathrooms": 3,
+    "rating": 4.8,
+    "reviewCount": 18,
+    "images": [
+      "https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l85-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l85-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l85-b3",
+        "title": "Bedroom 3",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l85-b4",
+        "title": "Bedroom 4",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Iron",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r445", "r446", "r447"],
+    "bookingIds": ["bk83", "bk84"]
+  },
+  {
+    "id": "l86",
+    "hostId": "u15",
+    "title": "Hi-tech City Apartment in Hyderabad",
+    "description": "Experience the charm of a modern apartment nestled in Hyderabad, Telangana. Perfectly suited for 3 guests, this space offers 2 bedrooms, 2 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Telangana",
+      "city": "Hyderabad",
+      "address": "187 Hi-tech City, Hyderabad",
+      "latitude": "17.385",
+      "longitude": "78.4867"
+    },
+    "pricePerNight": 4000,
+    "guests": 3,
+    "bedroomsCount": 2,
+    "beds": 2,
+    "bathrooms": 2,
+    "rating": 4.5,
+    "reviewCount": 7,
+    "images": [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l86-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l86-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r448", "r449"],
+    "bookingIds": ["bk85"]
+  },
+  {
+    "id": "l87",
+    "hostId": "u15",
+    "title": "Traditional House in Banjara Hills",
+    "description": "Experience the charm of a traditional house nestled in Hyderabad, Telangana. Perfectly suited for 5 guests, this space offers 3 bedrooms, 4 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "House",
+    "location": {
+      "country": "India",
+      "state": "Telangana",
+      "city": "Hyderabad",
+      "address": "188 Banjara Hills, Hyderabad",
+      "latitude": "17.385",
+      "longitude": "78.4867"
+    },
+    "pricePerNight": 6500,
+    "guests": 5,
+    "bedroomsCount": 3,
+    "beds": 4,
+    "bathrooms": 2,
+    "rating": 4.4,
+    "reviewCount": 6,
+    "images": [
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l87-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l87-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l87-b3",
+        "title": "Bedroom 3",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Iron",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r450", "r451", "r452"],
+    "bookingIds": []
+  },
+  {
+    "id": "l88",
+    "hostId": "u15",
+    "title": "Studio Near Gachibowli",
+    "description": "Experience the charm of a compact studio nestled in Hyderabad, Telangana. Perfectly suited for 2 guests, this space offers 1 bedroom, 1 bed and 1 bathroom. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Telangana",
+      "city": "Hyderabad",
+      "address": "189 Gachibowli, Hyderabad",
+      "latitude": "17.385",
+      "longitude": "78.4867"
+    },
+    "pricePerNight": 2800,
+    "guests": 2,
+    "bedroomsCount": 1,
+    "beds": 1,
+    "bathrooms": 1,
+    "rating": 4.2,
+    "reviewCount": 4,
+    "images": [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l88-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "TV",
+      "Coffee maker",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r453", "r454"],
+    "bookingIds": []
+  },
+  {
+    "id": "l89",
+    "hostId": "u15",
+    "title": "Luxury Penthouse in Jubilee Hills",
+    "description": "Experience the charm of a luxury penthouse nestled in Hyderabad, Telangana. Perfectly suited for 6 guests, this space offers 3 bedrooms, 3 beds and 3 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Penthouse",
+    "location": {
+      "country": "India",
+      "state": "Telangana",
+      "city": "Hyderabad",
+      "address": "190 Jubilee Hills, Hyderabad",
+      "latitude": "17.385",
+      "longitude": "78.4867"
+    },
+    "pricePerNight": 11000,
+    "guests": 6,
+    "bedroomsCount": 3,
+    "beds": 3,
+    "bathrooms": 3,
+    "rating": 4.9,
+    "reviewCount": 22,
+    "images": [
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l89-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l89-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l89-b3",
+        "title": "Bedroom 3",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Iron",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r455", "r456", "r457"],
+    "bookingIds": ["bk86", "bk87"]
+  },
+  {
+    "id": "l90",
+    "hostId": "u15",
+    "title": "Cozy B&B in Old City",
+    "description": "Experience the charm of a cozy bed & breakfast nestled in Hyderabad, Telangana. Perfectly suited for 4 guests, this space offers 2 bedrooms, 2 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Bed & breakfast",
+    "location": {
+      "country": "India",
+      "state": "Telangana",
+      "city": "Hyderabad",
+      "address": "191 Old City, Hyderabad",
+      "latitude": "17.385",
+      "longitude": "78.4867"
+    },
+    "pricePerNight": 3500,
+    "guests": 4,
+    "bedroomsCount": 2,
+    "beds": 2,
+    "bathrooms": 2,
+    "rating": 4.6,
+    "reviewCount": 11,
+    "images": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l90-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l90-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r458", "r459", "r460"],
+    "bookingIds": []
+  },
+  {
+    "id": "l91",
+    "hostId": "u16",
+    "title": "Vintage Bungalow in Koregaon Park",
+    "description": "Experience the charm of a vintage bungalow nestled in Pune, Maharashtra. Perfectly suited for 4 guests, this space offers 2 bedrooms, 3 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "House",
+    "location": {
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Pune",
+      "address": "192 Koregaon Park, Pune",
+      "latitude": "18.5204",
+      "longitude": "73.8567"
+    },
+    "pricePerNight": 5000,
+    "guests": 4,
+    "bedroomsCount": 2,
+    "beds": 3,
+    "bathrooms": 2,
+    "rating": 4.7,
+    "reviewCount": 13,
+    "images": [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l91-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l91-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r461", "r462", "r463"],
+    "bookingIds": ["bk88"]
+  },
+  {
+    "id": "l92",
+    "hostId": "u16",
+    "title": "Modern Apartment in Hinjewadi",
+    "description": "Experience the charm of a modern apartment nestled in Pune, Maharashtra. Perfectly suited for 3 guests, this space offers 2 bedrooms, 2 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Pune",
+      "address": "193 Hinjewadi Phase 3, Pune",
+      "latitude": "18.5204",
+      "longitude": "73.8567"
+    },
+    "pricePerNight": 3200,
+    "guests": 3,
+    "bedroomsCount": 2,
+    "beds": 2,
+    "bathrooms": 2,
+    "rating": 4.3,
+    "reviewCount": 5,
+    "images": [
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l92-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l92-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r464", "r465"],
+    "bookingIds": []
+  },
+  {
+    "id": "l93",
+    "hostId": "u16",
+    "title": "Peaceful Studio in Kalyani Nagar",
+    "description": "Experience the charm of a peaceful studio nestled in Pune, Maharashtra. Perfectly suited for 2 guests, this space offers 1 bedroom, 1 bed and 1 bathroom. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Pune",
+      "address": "194 Kalyani Nagar, Pune",
+      "latitude": "18.5204",
+      "longitude": "73.8567"
+    },
+    "pricePerNight": 2500,
+    "guests": 2,
+    "bedroomsCount": 1,
+    "beds": 1,
+    "bathrooms": 1,
+    "rating": 4.4,
+    "reviewCount": 8,
+    "images": [
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l93-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "TV",
+      "Coffee maker",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r466", "r467", "r468"],
+    "bookingIds": []
+  },
+  {
+    "id": "l94",
+    "hostId": "u16",
+    "title": "Luxury Villa in Baner",
+    "description": "Experience the charm of a luxury villa nestled in Pune, Maharashtra. Perfectly suited for 6 guests, this space offers 3 bedrooms, 4 beds and 3 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "House",
+    "location": {
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Pune",
+      "address": "195 Baner Road, Pune",
+      "latitude": "18.5204",
+      "longitude": "73.8567"
+    },
+    "pricePerNight": 8500,
+    "guests": 6,
+    "bedroomsCount": 3,
+    "beds": 4,
+    "bathrooms": 3,
+    "rating": 4.8,
+    "reviewCount": 16,
+    "images": [
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l94-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l94-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l94-b3",
+        "title": "Bedroom 3",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Iron",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r469", "r470", "r471"],
+    "bookingIds": ["bk89", "bk90"]
+  },
+  {
+    "id": "l95",
+    "hostId": "u16",
+    "title": "Riverside Retreat in Bavdhan",
+    "description": "Experience the charm of a riverside cabin nestled in Pune, Maharashtra. Perfectly suited for 5 guests, this space offers 3 bedrooms, 3 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Cabin",
+    "location": {
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Pune",
+      "address": "196 Bavdhan, Pune",
+      "latitude": "18.5204",
+      "longitude": "73.8567"
+    },
+    "pricePerNight": 6000,
+    "guests": 5,
+    "bedroomsCount": 3,
+    "beds": 3,
+    "bathrooms": 2,
+    "rating": 4.5,
+    "reviewCount": 9,
+    "images": [
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l95-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l95-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l95-b3",
+        "title": "Bedroom 3",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r472", "r473"],
+    "bookingIds": []
+  },
+  {
+    "id": "l96",
+    "hostId": "u17",
+    "title": "Garden Villa in Whitefield",
+    "description": "Experience the charm of a garden villa nestled in Bengaluru, Karnataka. Perfectly suited for 5 guests, this space offers 3 bedrooms, 4 beds and 3 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "House",
+    "location": {
+      "country": "India",
+      "state": "Karnataka",
+      "city": "Bengaluru",
+      "address": "197 Whitefield, Bengaluru",
+      "latitude": "12.9716",
+      "longitude": "77.5946"
+    },
+    "pricePerNight": 7000,
+    "guests": 5,
+    "bedroomsCount": 3,
+    "beds": 4,
+    "bathrooms": 3,
+    "rating": 4.6,
+    "reviewCount": 10,
+    "images": [
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l96-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l96-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l96-b3",
+        "title": "Bedroom 3",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r474", "r475", "r476"],
+    "bookingIds": ["bk91"]
+  },
+  {
+    "id": "l97",
+    "hostId": "u17",
+    "title": "Tech Hub Apartment in Koramangala",
+    "description": "Experience the charm of a modern tech hub apartment nestled in Bengaluru, Karnataka. Perfectly suited for 3 guests, this space offers 2 bedrooms, 2 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Karnataka",
+      "city": "Bengaluru",
+      "address": "198 Koramangala, Bengaluru",
+      "latitude": "12.9716",
+      "longitude": "77.5946"
+    },
+    "pricePerNight": 4500,
+    "guests": 3,
+    "bedroomsCount": 2,
+    "beds": 2,
+    "bathrooms": 2,
+    "rating": 4.5,
+    "reviewCount": 7,
+    "images": [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l97-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l97-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r477", "r478"],
+    "bookingIds": []
+  },
+  {
+    "id": "l98",
+    "hostId": "u17",
+    "title": "Studio in Indiranagar",
+    "description": "Experience the charm of a trendy studio nestled in Bengaluru, Karnataka. Perfectly suited for 2 guests, this space offers 1 bedroom, 1 bed and 1 bathroom. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Flat / apartment",
+    "location": {
+      "country": "India",
+      "state": "Karnataka",
+      "city": "Bengaluru",
+      "address": "199 Indiranagar, Bengaluru",
+      "latitude": "12.9716",
+      "longitude": "77.5946"
+    },
+    "pricePerNight": 3000,
+    "guests": 2,
+    "bedroomsCount": 1,
+    "beds": 1,
+    "bathrooms": 1,
+    "rating": 4.7,
+    "reviewCount": 14,
+    "images": [
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l98-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "TV",
+      "Coffee maker",
+      "Hairdryer",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r479", "r480", "r481"],
+    "bookingIds": ["bk92"]
+  },
+  {
+    "id": "l99",
+    "hostId": "u17",
+    "title": "Luxury Penthouse in MG Road",
+    "description": "Experience the charm of a luxury penthouse nestled in Bengaluru, Karnataka. Perfectly suited for 4 guests, this space offers 2 bedrooms, 3 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Penthouse",
+    "location": {
+      "country": "India",
+      "state": "Karnataka",
+      "city": "Bengaluru",
+      "address": "200 MG Road, Bengaluru",
+      "latitude": "12.9716",
+      "longitude": "77.5946"
+    },
+    "pricePerNight": 10000,
+    "guests": 4,
+    "bedroomsCount": 2,
+    "beds": 3,
+    "bathrooms": 2,
+    "rating": 4.9,
+    "reviewCount": 25,
+    "images": [
+      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l99-b1",
+        "title": "Bedroom 1",
+        "beds": 2,
+        "images": ["https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l99-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Iron",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r482", "r483", "r484"],
+    "bookingIds": ["bk93", "bk94"]
+  },
+  {
+    "id": "l100",
+    "hostId": "u17",
+    "title": "Eco-Friendly Home in Electronic City",
+    "description": "Experience the charm of an eco-friendly earth home nestled in Bengaluru, Karnataka. Perfectly suited for 6 guests, this space offers 3 bedrooms, 3 beds and 2 bathrooms. Enjoy local cuisine, scenic views and modern comforts.",
+    "category": "Earth home",
+    "location": {
+      "country": "India",
+      "state": "Karnataka",
+      "city": "Bengaluru",
+      "address": "201 Electronic City, Bengaluru",
+      "latitude": "12.9716",
+      "longitude": "77.5946"
+    },
+    "pricePerNight": 5500,
+    "guests": 6,
+    "bedroomsCount": 3,
+    "beds": 3,
+    "bathrooms": 2,
+    "rating": 4.4,
+    "reviewCount": 6,
+    "images": [
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=70"
+    ],
+    "bedrooms": [
+      {
+        "id": "l100-b1",
+        "title": "Bedroom 1",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l100-b2",
+        "title": "Bedroom 2",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70"]
+      },
+      {
+        "id": "l100-b3",
+        "title": "Bedroom 3",
+        "beds": 1,
+        "images": ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=70"]
+      }
+    ],
+    "amenities": [
+      "Air conditioning",
+      "Essentials",
+      "Fridge",
+      "Heating",
+      "Hot water",
+      "Kitchen",
+      "TV",
+      "Coffee maker",
+      "Cooking basics",
+      "Hairdryer",
+      "Hangers",
+      "Smoke alarm"
+    ],
+    "reviewIds": ["r485", "r486", "r487"],
+    "bookingIds": []
   }
 ];
 
