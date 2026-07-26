@@ -3,13 +3,10 @@ const categories = [
   {
     "id": "c1",
     "name": "House",
-    "icon": "fa-house"
+    "icon": "fa-house",
+    
   },
-  {
-    "id": "c2",
-    "name": "Flat / apartment",
-    "icon": "fa-building"
-  },
+  
   {
     "id": "c3",
     "name": "Barn",
@@ -30,11 +27,7 @@ const categories = [
     "name": "Cabin",
     "icon": "fa-tree"
   },
-  {
-    "id": "c7",
-    "name": "Campervan / motorhome",
-    "icon": "fa-caravan"
-  },
+  
   {
     "id": "c8",
     "name": "Casa particular",
@@ -65,6 +58,7 @@ const categories = [
     "name": "Dammuso",
     "icon": "fa-house-user"
   },
+  
   {
     "id": "c14",
     "name": "Dome",
@@ -106,6 +100,16 @@ const categories = [
     "icon": "fa-mosque"
   },
   {
+    "id": "c2",
+    "name": "Flat / apartment",
+    "icon": "fa-building"
+  },
+  {
+    "id": "c7",
+    "name": "Campervan / motorhome",
+    "icon": "fa-caravan"
+  },
+  {
     "id": "c22",
     "name": "Ryokan",
     "icon": "fa-fan"
@@ -138,7 +142,7 @@ const categories = [
   {
     "id": "c28",
     "name": "Trullo",
-    "icon": "fa-cone"
+    "icon": "fa-monument"
   },
   {
     "id": "c29",
