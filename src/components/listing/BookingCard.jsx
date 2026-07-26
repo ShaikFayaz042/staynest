@@ -1,4 +1,4 @@
-﻿export default function BookingCard() {
+﻿export default function BookingCard({list}) {
   return (
     <aside className="sticky top-24 space-y-4">
       <div className="flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
@@ -38,12 +38,6 @@
           Reserve
         </button>
         <p className="mt-3 text-center text-sm text-gray-600">You won't be charged yet</p>
-      </div>
-
-      <div className="text-center">
-        <button className="inline-flex items-center gap-2 text-sm text-gray-700 underline">
-          <i className="fa-solid fa-flag" /> Report this listing
-        </button>
       </div>
     </aside>
   );

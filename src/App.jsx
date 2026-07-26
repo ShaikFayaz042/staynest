@@ -1,20 +1,16 @@
-import HomePage from "./pages/HomePage";
-import ListingPage from "./pages/ListingPage";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+import { Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import HostPage from './pages/HostPage';
+import ListingPage from './pages/ListingPage';
 
-export default function App() {
+function App() {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#ffffff",
-      }}
-    >
-      <HomePage></HomePage>
-      <ListingPage></ListingPage>
-      <SignupPage></SignupPage>
-      <LoginPage></LoginPage>
-    </div>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/host" element={<HostPage />} />
+      <Route path="/listing/:id" element={<ListingPage />} />
+    </Routes>
   );
 }
+
+export default App;

@@ -6,7 +6,7 @@ import ListingGrid from "../components/home/ListingGrid";
 export default function HomePage() {
   return (
     <div className="min-h-screen min-w-screen  mx-auto px-6 lg:px-10">
-      <Navbar></Navbar>
+      <Navbar type={"hosting"}></Navbar>
       <CategoryBar></CategoryBar>
       <ListingGrid></ListingGrid>
       <Footer></Footer>

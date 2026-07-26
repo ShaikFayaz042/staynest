@@ -1,12 +1,14 @@
-﻿import  { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 
 import StayNestLogo from "../../assets/logos/StayNestLogo";
 import SearchBar from "./SearchBar";
+import { useNavigate } from "react-router-dom";
 
-export default function Navbar() {
+export default function Navbar({ type }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleResize = () => {
@@ -27,7 +29,13 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
+  const handleSwitch = () => {
+    if (type === 'hosting') {
+      navigate('/host');
+    } else {
+      navigate('/');
+    }
+  };
   return (
     <div className="relative w-full">
       <nav className="w-full h-16 md:h-20 border-b border-gray-200 flex items-center justify-between px-4 md:px-8 bg-white sticky top-0 z-50">
@@ -64,8 +72,8 @@ export default function Navbar() {
             </svg>
           </button>
           {/* Switch to hosting */}
-          <button className="text-sm font-medium text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-full transition-colors hidden lg:block">
-            Switch to hosting
+          <button onClick={handleSwitch} className="text-sm font-medium text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-full transition-colors hidden lg:block">
+            {` Switch to ${type}`}
           </button>
 
           {/* Profile circle "S" */}
@@ -148,9 +156,8 @@ export default function Navbar() {
 
       {/* 5. Mobile Menu Dropdown (Mobile & Tablet < md) */}
       <div
-        className={`md:hidden fixed top-16 left-0 w-full bg-white border-b border-gray-200 shadow-lg transition-all duration-300 ease-in-out overflow-hidden z-40 ${
-          isMobileMenuOpen ? "max-h-[500px] opacity-100 visible" : "max-h-0 opacity-0 invisible"
-        }`}
+        className={`md:hidden fixed top-16 left-0 w-full bg-white border-b border-gray-200 shadow-lg transition-all duration-300 ease-in-out overflow-hidden z-40 ${isMobileMenuOpen ? "max-h-125 opacity-100 visible" : "max-h-0 opacity-0 invisible"
+          }`}
       >
         <div className="flex flex-col p-4 space-y-4">
           <div className="flex flex-col space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-100">

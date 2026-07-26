@@ -1,6 +1,13 @@
-﻿export default function ListingCard({ listing }) {
+﻿import { useNavigate } from "react-router-dom";
+
+export default function ListingCard({ listing }) {
+   const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/listing/${listing.id}`);
+  };
   return (
-    <div className="group cursor-pointer">
+    <div onClick={handleClick} className="group cursor-pointer">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-200">
         <img
