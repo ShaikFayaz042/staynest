@@ -1,21 +1,13 @@
 ﻿import { useEffect, useRef, useState } from "react";
 
-const CATEGORIES = [
-  { label: "Cleanliness", value: "4.9", icon: "fa-spray-can-sparkles" },
-  { label: "Accuracy", value: "5.0", icon: "fa-circle-check" },
-  { label: "Check-in", value: "5.0", icon: "fa-key" },
-  { label: "Communication", value: "5.0", icon: "fa-comment" },
-  { label: "Location", value: "4.9", icon: "fa-map" },
-  { label: "Value", value: "4.9", icon: "fa-tag" },
-];
-
-const BARS = [
-  { star: 5, w: "w-full" },
-  { star: 4, w: "w-2/3" },
-  { star: 3, w: "w-1/6" },
-  { star: 2, w: "w-1/12" },
-  { star: 1, w: "w-1/12" },
-];
+const CATEGORY_MAP = {
+  cleanliness: { label: "Cleanliness", icon: "fa-spray-can-sparkles" },
+  accuracy: { label: "Accuracy", icon: "fa-circle-check" },
+  checkIn: { label: "Check-in", icon: "fa-key" }, 
+  communication: { label: "Communication", icon: "fa-comment" },
+  location: { label: "Location", icon: "fa-map" },
+  value: { label: "Value", icon: "fa-tag" },
+};
 
 const LAUREL_STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap');
@@ -156,13 +148,19 @@ function Laurel({ mirror = false }) {
   );
 }
 
-function AnimatedRating() {
+function AnimatedRating({ targetRating }) {
   const numRef = useRef(null);
   const containerRef = useRef(null);
   const [display, setDisplay] = useState("0.0");
 
   useEffect(() => {
-    const target = 5.0;
+    // If no ratings, just display dash
+    if (!targetRating) {
+      setDisplay("—");
+      return;
+    }
+
+    const target = targetRating;
     const duration = 2500;
     const fps = 60;
     const totalFrames = Math.round((duration / 1000) * fps);
@@ -205,16 +203,16 @@ function AnimatedRating() {
       const progress = frame / totalFrames;
       const currentVal = target * easeOutQuart(progress);
 
-      if (currentVal >= lastEmojiThreshold + 0.18 && currentVal <= 5.0) {
+      if (currentVal >= lastEmojiThreshold + 0.18 && currentVal <= target) {
         spawnEmoji(currentVal);
         lastEmojiThreshold = currentVal;
       }
 
       if (frame >= totalFrames) {
-        setDisplay("5.0");
+        setDisplay(target.toFixed(1));
         clearInterval(counter);
         for (let i = 0; i < 4; i++) {
-          const t = setTimeout(() => spawnEmoji(5.0), i * 100);
+          const t = setTimeout(() => spawnEmoji(target), i * 100);
           timers.push(t);
         }
         const t = setTimeout(() => {
@@ -230,7 +228,7 @@ function AnimatedRating() {
       clearInterval(counter);
       timers.forEach((t) => clearTimeout(t));
     };
-  }, []);
+  }, [targetRating]);
 
   return (
     <div className="rs-rating-wrapper">
@@ -243,45 +241,104 @@ function AnimatedRating() {
   );
 }
 
-export default function RatingSummary() {
+export default function RatingSummary({ reviewIds = [] }) {
+  const [reviews, setReviews] = useState([]);
+  const [overallRating, setOverallRating] = useState(0);
+  const [categoryAverages, setCategoryAverages] = useState({});
+  const [ratingDistribution, setRatingDistribution] = useState({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
+
+  useEffect(() => {
+    const allReviews = JSON.parse(localStorage.getItem("reviews")) || [];
+    const listingReviews = allReviews.filter(r => reviewIds.includes(r.id));
+    setReviews(listingReviews);
+
+    if (listingReviews.length === 0) return;
+
+    // Compute overall average dynamically
+    const totalRating = listingReviews.reduce((sum, r) => sum + (r.rating || 0), 0);
+    const avg = listingReviews.length ? totalRating / listingReviews.length : 0;
+    setOverallRating(Math.round(avg * 10) / 10);
+
+    // Compute category averages dynamically
+    const catSums = {};
+    const catCounts = {};
+    listingReviews.forEach(r => {
+      if (r.categories) {
+        Object.entries(r.categories).forEach(([key, val]) => {
+          if (CATEGORY_MAP[key]) {
+            catSums[key] = (catSums[key] || 0) + val;
+            catCounts[key] = (catCounts[key] || 0) + 1;
+          }
+        });
+      }
+    });
+    const catAvgs = {};
+    Object.keys(catSums).forEach(key => {
+      catAvgs[key] = (catSums[key] / catCounts[key]).toFixed(1);
+    });
+    setCategoryAverages(catAvgs);
+
+    // Distribution dynamically mapped for progress bars
+    const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    listingReviews.forEach(r => {
+      const rating = Math.round(r.rating || 0);
+      if (rating >= 1 && rating <= 5) dist[rating] = (dist[rating] || 0) + 1;
+    });
+    setRatingDistribution(dist);
+  }, [reviewIds]);
+
+  const categories = Object.keys(CATEGORY_MAP).map(key => ({
+    label: CATEGORY_MAP[key].label,
+    value: categoryAverages[key] || "—",
+    icon: CATEGORY_MAP[key].icon,
+  }));
+
+  const maxCount = Math.max(...Object.values(ratingDistribution), 1);
+  const bars = [5, 4, 3, 2, 1].map(star => ({
+    star,
+    percent: (ratingDistribution[star] / maxCount) * 100,
+  }));
+
   return (
     <section className="border-b border-gray-200 py-8">
       <style>{LAUREL_STYLES}</style>
+      
+      {/* Visual Animation Container */}
       <div className="mb-6 flex flex-col items-center">
-        <AnimatedRating />
-        <p className="mt-3 text-lg font-semibold text-gray-900">Guest favourite</p>
+        <AnimatedRating targetRating={overallRating} />
+        <p className="mt-3 text-lg font-semibold text-gray-900">
+          {reviews.length > 0 ? "Guest favourite" : "No reviews yet"}
+        </p>
         <p className="mt-1 max-w-sm text-center text-sm text-gray-600">
-          This home is a guest favourite based on ratings, reviews and reliability
+          {reviews.length > 0
+            ? `Based on ${reviews.length} review${reviews.length > 1 ? "s" : ""}`
+            : "Be the first to leave a review"}
         </p>
         <button className="mt-2 text-xs text-gray-700 underline">How reviews work</button>
       </div>
 
+      {/* Dynamic Grid: Progress Bars & Categories */}
       <div className="grid grid-cols-7 gap-4 border-t border-gray-200 pt-6 text-sm">
         <div>
           <div className="mb-2 text-xs font-semibold text-gray-900">Overall rating</div>
-          {BARS.map((b) => (
+          {bars.map((b) => (
             <div key={b.star} className="flex items-center gap-2">
               <span className="w-3 text-xs text-gray-700">{b.star}</span>
               <div className="h-1 flex-1 rounded-full bg-gray-200">
-                <div className={`h-full rounded-full bg-gray-900 ${b.w}`} />
+                <div
+                  className="h-full rounded-full bg-gray-900"
+                  style={{ width: `${b.percent}%` }}
+                />
               </div>
             </div>
           ))}
         </div>
-        {CATEGORIES.map((c) => (
+        {categories.map((c) => (
           <div key={c.label} className="border-l border-gray-200 pl-4">
             <div className="text-xs font-semibold text-gray-900">{c.label}</div>
             <div className="mt-1 text-lg font-semibold text-gray-900">{c.value}</div>
             <i className={`fa-solid ${c.icon} mt-2 text-xl text-gray-800`} />
           </div>
-        ))}
-      </div>
-
-      <div className="mt-6 flex gap-3 overflow-x-auto no-scrollbar">
-        {["Pool","Hospitality","Cleanliness","Family","Check-in","Location","Accuracy","Condition","Comfort"].map((t) => (
-          <button key={t} className="flex shrink-0 items-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-800">
-            <i className="fa-solid fa-circle text-xs" /> {t}
-          </button>
         ))}
       </div>
     </section>

@@ -10,15 +10,16 @@ import ReviewSection from "../components/listing/ReviewSection";
 import MapSection from "../components/listing/MapSection";
 import HostSection from "../components/listing/HostSection";
 import { useParams } from "react-router-dom";
-const listings = JSON.parse(localStorage.getItem('listings')) || [];
 
 export default function ListingPage() {
   const { id } = useParams();
+  const listings = JSON.parse(localStorage.getItem('listings')) || [];
   const listing = listings.find(l => l.id === id);
 
   if (!listing) {
-    return <div>Listing not found</div>;
+    return <div className="text-center py-20">Listing not found</div>;
   }
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -34,10 +35,10 @@ export default function ListingPage() {
             <BookingCard list={listing} />
           </div>
         </div>
-        <RatingSummary list={listing} />
-        <ReviewSection />
+        <RatingSummary reviewIds={listing.reviewIds || []} />
+        <ReviewSection reviewIds={listing.reviewIds || []} />
         <MapSection />
-        <HostSection />
+        <HostSection hostId={listing.hostId} />
       </div>
       <Footer />
     </div>
