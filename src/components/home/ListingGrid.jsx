@@ -1,4 +1,4 @@
-﻿import listings from "../../data/listings";
+﻿const listings = JSON.parse(localStorage.getItem('listings')) || [];
 import ScrollRow from "./ScrollRow";
 
 export default function ListingGrid() {
