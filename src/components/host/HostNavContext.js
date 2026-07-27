@@ -6,4 +6,7 @@ export const HostNavContext = createContext({
   inWizard: false,
   index: 0,
   total: 1,
+  formData: {},
+  setFormData: () => {},
+  nextDisabled: false,
 });

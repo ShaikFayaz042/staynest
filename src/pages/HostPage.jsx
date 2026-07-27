@@ -3,11 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import Footer from '../components/common/Footer';
 import Navbar from '../components/common/Navbar';
-const listings = JSON.parse(localStorage.getItem('listings')) || [];
 
 export default function HostPage() {
   const { user } = useAuth();
 
+  // Read listings from localStorage inside the component so it updates on each render
+  const listings = JSON.parse(localStorage.getItem('listings')) || [];
   const userListings = user ? listings.filter(l => l.hostId === user.id) : [];
 
   return (
@@ -17,7 +18,6 @@ export default function HostPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-extrabold">Your listing</h1>
           <div className="flex items-center gap-3">
-            {/* Plus button -> Link to wizard */}
             <Link
               to="/host/create"
               className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition"

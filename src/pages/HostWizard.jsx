@@ -1,24 +1,167 @@
-// src/pages/HostWizard.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { HostNavContext } from "../components/host/HostNavContext";
-import SetupIntro from "../components/host/SetupIntro";
-import AddressModal from "../components/host/AddressModal";
+import AddressSetupStep from "../components/host/AddressSetupStep";
 import StepIntro from "../components/host/StepIntro";
 import PropertyTypeStep from "../components/host/PropertyTypeStep";
-import MapPinStep from "../components/host/MapPinStep";
 import BasicsStep from "../components/host/BasicsStep";
 import AmenitiesStep from "../components/host/AmenitiesStep";
 import PhotosStep from "../components/host/PhotosStep";
-import UploadModal from "../components/host/UploadModal";
 import TitleDescriptionStep from "../components/host/TitleDescriptionStep";
 import PricingStep from "../components/host/PricingStep";
 
-// Phase boundaries for progress bar
+// Helper to load amenities from localStorage
+function getAmenitiesMap() {
+  const FALLBACK = {
+    basics: [
+      { id: "b1", name: "Air conditioning", icon: "fa-solid fa-snowflake" },
+      { id: "b2", name: "Essentials", icon: "fa-solid fa-suitcase-rolling" },
+      { id: "b3", name: "Fridge", icon: "fa-solid fa-box" },
+      { id: "b4", name: "Heating", icon: "fa-solid fa-temperature-arrow-up" },
+      { id: "b5", name: "Hot water", icon: "fa-solid fa-faucet-drip" },
+      { id: "b6", name: "Kitchen", icon: "fa-solid fa-kitchen-set" },
+      { id: "b7", name: "TV", icon: "fa-solid fa-tv" },
+      { id: "b8", name: "Tumble dryer", icon: "fa-solid fa-wind" },
+      { id: "b9", name: "Washing machine", icon: "fa-solid fa-shirt" },
+      { id: "b10", name: "Wifi", icon: "fa-solid fa-wifi" }
+    ],
+    popular: [
+      { id: "p1", name: "Coffee maker", icon: "fa-solid fa-mug-hot" },
+      { id: "p2", name: "Cooking basics", icon: "fa-solid fa-utensils" },
+      { id: "p3", name: "Hairdryer", icon: "fa-solid fa-wind" },
+      { id: "p4", name: "Hangers", icon: "fa-solid fa-shirt" },
+      { id: "p5", name: "Iron", icon: "fa-solid fa-bolt" },
+      { id: "p6", name: "Shampoo", icon: "fa-solid fa-bottle-droplet" },
+      { id: "p7", name: "Dedicated workspace", icon: "fa-solid fa-laptop" },
+      { id: "p8", name: "EV charger", icon: "fa-solid fa-charging-station" },
+      { id: "p9", name: "Free parking", icon: "fa-solid fa-square-parking" },
+      { id: "p10", name: "Gym", icon: "fa-solid fa-dumbbell" },
+      { id: "p11", name: "Hot tub", icon: "fa-solid fa-hot-tub-person" },
+      { id: "p12", name: "Indoor fireplace", icon: "fa-solid fa-fire" },
+      { id: "p13", name: "Outdoor furniture", icon: "fa-solid fa-chair" },
+      { id: "p14", name: "Pool", icon: "fa-solid fa-water-ladder" }
+    ],
+    location: [
+      { id: "l1", name: "Beach access", icon: "fa-solid fa-umbrella-beach" },
+      { id: "l2", name: "Waterfront", icon: "fa-solid fa-water" },
+      { id: "l3", name: "Mountain view", icon: "fa-solid fa-mountain" },
+      { id: "l4", name: "City view", icon: "fa-solid fa-city" },
+      { id: "l5", name: "Garden view", icon: "fa-solid fa-leaf" }
+    ],
+    safety: [
+      { id: "s1", name: "Carbon monoxide alarm", icon: "fa-solid fa-cloud" },
+      { id: "s2", name: "Smoke alarm", icon: "fa-solid fa-bell" },
+      { id: "s3", name: "First aid kit", icon: "fa-solid fa-kit-medical" },
+      { id: "s4", name: "Fire extinguisher", icon: "fa-solid fa-fire-extinguisher" },
+      { id: "s5", name: "Security cameras", icon: "fa-solid fa-video" }
+    ]
+  };
+
+  try {
+    const raw = localStorage.getItem("amenities");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        // Flatten into { id: name } map
+        const map = {};
+        Object.values(parsed).forEach(category => {
+          category.forEach(item => {
+            map[item.id] = item.name;
+          });
+        });
+        return map;
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to parse amenities from localStorage", e);
+  }
+
+  // Flatten fallback
+  const map = {};
+  Object.values(FALLBACK).forEach(category => {
+    category.forEach(item => {
+      map[item.id] = item.name;
+    });
+  });
+  return map;
+}
+
+function createListing(data, user) {
+  const listings = JSON.parse(localStorage.getItem("listings")) || [];
+  const maxId = listings.reduce((max, l) => {
+    const num = parseInt(l.id.replace("l", ""));
+    return num > max ? num : max;
+  }, 0);
+  const newId = `l${maxId + 1}`;
+
+  // Address
+  const addr = data.address || {};
+  const location = {
+    country: addr.country || "India",
+    state: addr.state || "",
+    city: addr.city || "",
+    address: `${addr.flat ? addr.flat + ", " : ""}${addr.street || ""}`,
+    latitude: "28.6139",
+    longitude: "77.209",
+  };
+
+  // Bedrooms – distribute total beds among bedroomsCount
+  const bedroomsCount = data.bedrooms || 1;
+  const totalBeds = data.beds || 1;
+  let bedsPerRoom = Math.floor(totalBeds / bedroomsCount);
+  let remaining = totalBeds - (bedsPerRoom * bedroomsCount);
+  const bedrooms = [];
+  for (let i = 0; i < bedroomsCount; i++) {
+    let bedCount = bedsPerRoom + (remaining > 0 ? 1 : 0);
+    if (remaining > 0) remaining--;
+    // Ensure at least 1 bed per bedroom if totalBeds >= bedroomsCount
+    if (bedCount === 0) bedCount = 1;
+    bedrooms.push({
+      id: `${newId}-b${i + 1}`,
+      title: `Bedroom ${i + 1}`,
+      beds: bedCount,
+      images: [
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70",
+        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70",
+      ],
+    });
+  }
+
+  // Amenities – convert IDs to names
+  const amenityMap = getAmenitiesMap();
+  const amenityNames = (data.amenities || []).map(id => amenityMap[id]).filter(Boolean);
+
+  return {
+    id: newId,
+    hostId: user ? user.id : "unknown",
+    title: data.title || "Untitled",
+    description: data.description || "",
+    category: data.category || "House",
+    location: location,
+    pricePerNight: data.basePrice || 1827,
+    guests: data.guests || 1,
+    bedroomsCount: bedroomsCount,
+    beds: totalBeds,
+    bathrooms: data.bathrooms || 1,
+    rating: 0,
+    reviewCount: 0,
+    images: [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=70",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70",
+    ],
+    bedrooms: bedrooms,
+    amenities: amenityNames,
+    reviewIds: [],
+    bookingIds: [],
+  };
+}
+
 const PHASES = [
-  { start: 2, end: 5 },   // Phase 1
-  { start: 6, end: 10 },  // Phase 2
-  { start: 11, end: 12 }, // Phase 3
+  { start: 0, end: 3 },
+  { start: 4, end: 7 },
+  { start: 8, end: 9 },
 ];
 
 function computeProgress(index) {
@@ -29,47 +172,85 @@ function computeProgress(index) {
   });
 }
 
+function isStepValid(index, formData) {
+  switch (index) {
+    case 1: {
+      const address = formData.address || {};
+      return Boolean(
+        address.street?.trim() &&
+        address.city?.trim() &&
+        address.state?.trim() &&
+        address.pincode?.trim()
+      );
+    }
+    case 2:
+      return Boolean(formData.category);
+    case 5: {
+      // Amenities step – require at least 4 selected
+      const amenities = formData.amenities || [];
+      return amenities.length >= 4;
+    }
+    case 7:
+      return Boolean(formData.title?.trim() && formData.description?.trim());
+    default:
+      return true;
+  }
+}
+
+function saveListing(listing) {
+  const listings = JSON.parse(localStorage.getItem("listings")) || [];
+  listings.push(listing);
+  localStorage.setItem("listings", JSON.stringify(listings));
+}
+
 export default function HostWizard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [index, setIndex] = useState(0);
+  const [formData, setFormData] = useState({});
 
-  // Step list – last step is a success screen
   const steps = [
-    <SetupIntro />,
-    <AddressModal />,
     <StepIntro
       step={1}
       title="Tell us about your place"
-      description="In this step, we'll ask you which type of property you have and if guests will book the entire place or just a room."
-      image="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900"
+      description="We'll start with the basics: where your place is, what type it is, and how many guests it can host."
     />,
+    <AddressSetupStep />,
     <PropertyTypeStep />,
-    <MapPinStep />,
     <BasicsStep />,
     <StepIntro
       step={2}
       title="Make your place stand out"
-      description="In this step, you'll add some of the amenities your place offers, plus 5 or more photos. Then you'll create a title and description."
-      image="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=900"
+      description="Now add amenities, photos, and a compelling title and description."
     />,
     <AmenitiesStep />,
     <PhotosStep />,
-    <UploadModal />,
     <TitleDescriptionStep />,
     <StepIntro
       step={3}
       title="Finish up and publish"
-      description="Finally, you'll choose booking settings, set up pricing and publish your listing."
-      image="https://images.unsplash.com/photo-1615529182904-14819c35db37?w=900"
+      description="Finally, set your pricing and publish your listing."
     />,
     <PricingStep />,
-    // Final success step
+    // Success screen
     <div className="max-w-2xl mx-auto px-8 md:px-16 py-20 text-center">
       <div className="text-6xl mb-6">🎉</div>
       <h1 className="text-4xl font-extrabold text-gray-900">Your listing is ready!</h1>
       <p className="mt-3 text-gray-600">You can now view it on your dashboard.</p>
       <button
-        onClick={() => navigate("/host")}
+        onClick={() => {
+          // 1. Check if user is logged in
+          if (!user) {
+            alert("You must be logged in to publish a listing.");
+            navigate("/login");
+            return;
+          }
+
+          // 2. Publish the listing (no extra validation – step validations already passed)
+          const newListing = createListing(formData, user);
+          saveListing(newListing);
+          navigate("/host");
+        }}
         className="mt-8 px-6 py-3 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800"
       >
         Go to Dashboard
@@ -78,7 +259,12 @@ export default function HostWizard() {
   ];
 
   const total = steps.length;
-  const onNext = () => setIndex((i) => Math.min(i + 1, total - 1));
+  const nextDisabled = !isStepValid(index, formData);
+
+  const onNext = () => {
+    if (nextDisabled) return;
+    setIndex((i) => Math.min(i + 1, total - 1));
+  };
   const onBack = () => setIndex((i) => Math.max(i - 1, 0));
 
   useEffect(() => {
@@ -88,37 +274,23 @@ export default function HostWizard() {
   const progress = computeProgress(index);
   const isLast = index === total - 1;
 
-  // When on the last step, we don't show the default footer; we show the success screen's own button.
-  // But we still want a footer for all other steps.
-  // We'll render the wizard with a custom footer using HostFrame? 
-  // Actually, each step is rendered inside a HostFrame. The footer is part of HostFrame.
-  // We need to conditionally hide the footer for the last step.
-
-  // We'll wrap each step with HostFrame, but we need to override the footer for the last step.
-  // Simpler: We'll render the steps directly and use our own footer.
-  // We'll copy the sliding logic but use our own footer.
-
-  // For simplicity, we'll reuse the existing structure but override the footer for the last step.
-  // We'll create a wrapper component that conditionally renders footer.
-
   return (
-    <HostNavContext.Provider value={{ onNext, onBack, inWizard: true, index, total }}>
-      <div className="relative overflow-hidden w-full pb-24" style={{ fontFamily: "Nunito, sans-serif" }}>
+    <HostNavContext.Provider value={{ onNext, onBack, inWizard: true, index, total, formData, setFormData, nextDisabled }}>
+      <div className="h-screen overflow-hidden" style={{ fontFamily: "Nunito, sans-serif" }}>
         <div
-          className="flex transition-transform duration-500 ease-in-out"
+          className="flex h-full transition-transform duration-500 ease-in-out"
           style={{
             transform: `translateX(-${index * (100 / total)}%)`,
             width: `${total * 100}%`,
           }}
         >
           {steps.map((step, i) => (
-            <div key={i} style={{ width: `${100 / total}%` }} className="shrink-0">
+            <div key={i} style={{ width: `${100 / total}%` }} className="shrink-0 h-full">
               {step}
             </div>
           ))}
         </div>
 
-        {/* Unified sticky wizard footer – hidden on last step */}
         {!isLast && (
           <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
             <div className="grid grid-cols-3 gap-2">
@@ -135,18 +307,21 @@ export default function HostWizard() {
               <button
                 onClick={onBack}
                 disabled={index === 0}
-                className={`text-sm font-semibold underline ${
-                  index === 0 ? "text-gray-300 cursor-not-allowed no-underline" : "text-gray-900"
-                }`}
+                className={`text-sm font-semibold underline ${index === 0 ? "text-gray-300 cursor-not-allowed no-underline" : "text-gray-900"
+                  }`}
               >
                 Back
               </button>
               <div className="text-xs text-gray-500">
-                Step {index + 1} of {total - 1} {/* Exclude the success step from count? Or keep as is */}
+                Step {index + 1} of {total - 1}
               </div>
               <button
                 onClick={onNext}
-                className="px-6 py-3 rounded-lg text-sm font-semibold bg-black text-white hover:bg-gray-900"
+                disabled={nextDisabled}
+                className={`px-6 py-3 rounded-lg text-sm font-semibold ${nextDisabled
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-black text-white hover:bg-gray-900"
+                  }`}
               >
                 Next
               </button>
