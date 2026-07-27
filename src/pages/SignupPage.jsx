@@ -1,6 +1,9 @@
 ﻿import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import darkBg from "../assets/images/DarkBG.png";
 import lightBg from "../assets/images/LightBG.png";
+import Navbar from "../components/common/Navbar";
 
 function EyeIcon({ open }) {
   return open ? (
@@ -39,12 +42,33 @@ function Field({ icon, type = "text", placeholder, value, onChange, trailing }) 
 export default function SignupPage({ theme = "light" }) {
   const isDark = theme === "dark";
   const bg = isDark ? darkBg : lightBg;
+  const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [error, setError] = useState("");
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+
+    // Basic validation
+    if (!form.name.trim()) return setError("Name is required.");
+    if (!form.email.trim()) return setError("Email is required.");
+    if (form.password.length < 6) return setError("Password must be at least 6 characters.");
+    if (form.password !== form.confirm) return setError("Passwords do not match.");
+
+    const result = signup(form.name.trim(), form.email.trim(), form.password);
+    if (result.success) {
+      navigate("/"); // go home
+    } else {
+      setError(result.message);
+    }
+  };
 
   const userIcon = (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -52,12 +76,14 @@ export default function SignupPage({ theme = "light" }) {
       <circle cx="12" cy="7" r="4" />
     </svg>
   );
+
   const mailIcon = (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
       <polyline points="22,6 12,13 2,6" />
     </svg>
   );
+
   const lockIcon = (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -66,108 +92,113 @@ export default function SignupPage({ theme = "light" }) {
   );
 
   return (
-    <div
-      className="min-h-screen w-full flex items-center justify-center px-4 py-10"
-      style={{
-        backgroundImage: `url(${bg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="relative flex items-center justify-center px-5 py-4 border-b border-gray-200">
-          <a
-            to="/"
-            className="absolute left-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
-            aria-label="Close"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </a>
-          <h2 className="text-base font-semibold text-gray-900">Create Account</h2>
-        </div>
-
-        <div className="px-6 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">Join the Journey</h1>
-          <p className="text-sm text-gray-600 mt-1">Create your account to get started</p>
-
-          <form className="mt-6 space-y-3" onSubmit={(e) => e.preventDefault()}>
-            <Field icon={userIcon} placeholder="Full Name" value={form.name} onChange={set("name")} />
-            <Field icon={mailIcon} type="email" placeholder="Email" value={form.email} onChange={set("email")} />
-            <Field
-              icon={lockIcon}
-              type={showPwd ? "text" : "password"}
-              placeholder="Password"
-              value={form.password}
-              onChange={set("password")}
-              trailing={
-                <button type="button" onClick={() => setShowPwd((v) => !v)} className="hover:text-gray-700">
-                  <EyeIcon open={showPwd} />
-                </button>
-              }
-            />
-            <Field
-              icon={lockIcon}
-              type={showConfirm ? "text" : "password"}
-              placeholder="Confirm Password"
-              value={form.confirm}
-              onChange={set("confirm")}
-              trailing={
-                <button type="button" onClick={() => setShowConfirm((v) => !v)} className="hover:text-gray-700">
-                  <EyeIcon open={showConfirm} />
-                </button>
-              }
-            />
-
-            <button
-              type="submit"
-              className="w-full py-3 rounded-lg text-white font-semibold text-sm transition hover:opacity-90"
-              style={{ backgroundColor: "#FF385C" }}
+    <>
+      <Navbar variant="auth" />
+      <div
+        className="h-[calc(100vh-64px)] w-full flex items-center justify-center px-4"
+        style={{
+          backgroundImage: `url(${bg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="relative flex items-center justify-center px-5 py-4 border-b border-gray-200">
+            <Link
+              to="/"
+              className="absolute left-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+              aria-label="Close"
             >
-              Create Account
-            </button>
-          </form>
-
-          <div className="flex items-center gap-3 my-5">
-            <div className="flex-1 border-t border-gray-200" />
-            <span className="text-xs text-gray-500">or</span>
-            <div className="flex-1 border-t border-gray-200" />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </Link>
+            <h2 className="text-base font-semibold text-gray-900">Create Account</h2>
           </div>
 
-          <div className="space-y-3">
-            <button className="w-full flex items-center justify-center gap-3 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-800 hover:bg-gray-50 transition">
-              <svg width="18" height="18" viewBox="0 0 48 48">
-                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.3-.4-3.5z"/>
-                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
-                <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
-                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41 34.8 44 29.9 44 24c0-1.3-.1-2.3-.4-3.5z"/>
-              </svg>
-              Continue with Google
-            </button>
-            <button className="w-full flex items-center justify-center gap-3 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-800 hover:bg-gray-50 transition">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="#1e272e">
-                <path d="M12 .5C5.4.5 0 5.9 0 12.5c0 5.3 3.4 9.8 8.2 11.4.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2 1-.3 2-.4 3-.4s2 .1 3 .4c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.7-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6C20.6 22.3 24 17.8 24 12.5 24 5.9 18.6.5 12 .5z"/>
-              </svg>
-              Continue with GitHub
-            </button>
-          </div>
+          <div className="px-6 py-6">
+            <h1 className="text-2xl font-bold text-gray-900">Join the Journey</h1>
+            <p className="text-sm text-gray-600 mt-1">Create your account to get started</p>
 
-          <p className="text-center text-xs text-gray-500 mt-5">
-            By signing up, you agree to our{" "}
-            <a href="#" style={{ color: "#FF385C" }} className="hover:underline">Terms of Service</a> and{" "}
-            <a href="#" style={{ color: "#FF385C" }} className="hover:underline">Privacy Policy</a>
-          </p>
-          <p className="text-center text-sm text-gray-600 mt-2">
-            Already have an account?{" "}
-            <a to="/login" className="font-semibold" style={{ color: "#FF385C" }}>
-              Sign in
-            </a>
-          </p>
+            {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+
+            <form className="mt-6 space-y-3" onSubmit={handleSubmit}>
+              <Field icon={userIcon} placeholder="Full Name" value={form.name} onChange={set("name")} />
+              <Field icon={mailIcon} type="email" placeholder="Email" value={form.email} onChange={set("email")} />
+              <Field
+                icon={lockIcon}
+                type={showPwd ? "text" : "password"}
+                placeholder="Password"
+                value={form.password}
+                onChange={set("password")}
+                trailing={
+                  <button type="button" onClick={() => setShowPwd((v) => !v)} className="hover:text-gray-700">
+                    <EyeIcon open={showPwd} />
+                  </button>
+                }
+              />
+              <Field
+                icon={lockIcon}
+                type={showConfirm ? "text" : "password"}
+                placeholder="Confirm Password"
+                value={form.confirm}
+                onChange={set("confirm")}
+                trailing={
+                  <button type="button" onClick={() => setShowConfirm((v) => !v)} className="hover:text-gray-700">
+                    <EyeIcon open={showConfirm} />
+                  </button>
+                }
+              />
+
+              <button
+                type="submit"
+                className="w-full py-3 rounded-lg text-white font-semibold text-sm transition hover:opacity-90"
+                style={{ backgroundColor: "#FF385C" }}
+              >
+                Create Account
+              </button>
+            </form>
+
+            <div className="flex items-center gap-3 my-5">
+              <div className="flex-1 border-t border-gray-200" />
+              <span className="text-xs text-gray-500">or</span>
+              <div className="flex-1 border-t border-gray-200" />
+            </div>
+
+            <div className="space-y-3">
+              <button className="w-full flex items-center justify-center gap-3 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-800 hover:bg-gray-50 transition">
+                <svg width="18" height="18" viewBox="0 0 48 48">
+                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.3-.4-3.5z" />
+                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+                  <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41 34.8 44 29.9 44 24c0-1.3-.1-2.3-.4-3.5z" />
+                </svg>
+                Continue with Google
+              </button>
+              <button className="w-full flex items-center justify-center gap-3 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-800 hover:bg-gray-50 transition">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#1e272e">
+                  <path d="M12 .5C5.4.5 0 5.9 0 12.5c0 5.3 3.4 9.8 8.2 11.4.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2 1-.3 2-.4 3-.4s2 .1 3 .4c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.7-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6C20.6 22.3 24 17.8 24 12.5 24 5.9 18.6.5 12 .5z" />
+                </svg>
+                Continue with GitHub
+              </button>
+            </div>
+
+            <p className="text-center text-xs text-gray-500 mt-5">
+              By signing up, you agree to our{" "}
+              <a href="#" style={{ color: "#FF385C" }} className="hover:underline">Terms of Service</a> and{" "}
+              <a href="#" style={{ color: "#FF385C" }} className="hover:underline">Privacy Policy</a>
+            </p>
+            <p className="text-center text-sm text-gray-600 mt-2">
+              Already have an account?{" "}
+              <Link to="/login" className="font-semibold" style={{ color: "#FF385C" }}>
+                Sign in
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

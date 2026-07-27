@@ -1,0 +1,54 @@
+import { useAuth } from "../context/AuthContext";
+import Navbar from "../components/common/Navbar";
+
+export default function WishlistsPage() {
+  const { user } = useAuth();
+  const wishlists = JSON.parse(localStorage.getItem("wishlists")) || [];
+  const listings = JSON.parse(localStorage.getItem("listings")) || [];
+
+  // Find wishlists for this user
+  const userWishlists = wishlists.filter(w => w.userId === user?.id);
+  // Flatten all listing IDs from all wishlists
+  const wishlistListingIds = userWishlists.flatMap(w => w.listingIds || []);
+  const wishlistListings = listings.filter(l => wishlistListingIds.includes(l.id));
+
+  return (
+    <div className="min-h-screen bg-white" style={{ fontFamily: "Nunito, sans-serif" }}>
+      <Navbar type="travelling" variant="profile" />
+      <main className="max-w-6xl mx-auto px-8 md:px-16 py-12">
+        <h1 className="text-3xl font-extrabold">Wishlists</h1>
+        <p className="text-gray-600 mt-1">Your saved listings</p>
+
+        {user ? (
+          wishlistListings.length > 0 ? (
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {wishlistListings.map((listing) => (
+                <div key={listing.id} className="rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition">
+                  <img
+                    src={listing.images?.[0] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=70"}
+                    alt={listing.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-4">
+                    <div className="font-semibold">{listing.title}</div>
+                    <div className="text-sm text-gray-500">{listing.category} · {listing.location?.city}</div>
+                    <div className="text-sm font-bold mt-1">₹{listing.pricePerNight} / night</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-12 text-center text-gray-500">
+              <p className="text-xl">Your wishlist is empty.</p>
+              <p className="text-sm mt-1">Save listings you love to your wishlist!</p>
+            </div>
+          )
+        ) : (
+          <div className="mt-12 text-center text-gray-500">
+            <p className="text-xl">Please log in to view your wishlists.</p>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

@@ -1,14 +1,19 @@
 ﻿import { useState, useEffect, useRef } from "react";
-
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import StayNestLogo from "../../assets/logos/StayNestLogo";
 import SearchBar from "./SearchBar";
-import { useNavigate } from "react-router-dom";
 
-export default function Navbar({ type }) {
+export default function Navbar({
+  type = "hosting",
+  variant = "default", // 'default' | 'host-dashboard' | 'profile' | 'auth'
+}) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleResize = () => {
@@ -29,30 +34,120 @@ export default function Navbar({ type }) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
   const handleSwitch = () => {
-    if (type === 'hosting') {
-      navigate('/host');
+    if (type === "hosting") {
+      navigate("/host");
     } else {
-      navigate('/');
+      navigate("/");
     }
   };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    setIsProfileMenuOpen(false);
+  };
+
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : null;
+
+  // Check if user has any listings
+  const userListings = user
+    ? (JSON.parse(localStorage.getItem("listings")) || []).filter(l => l.hostId === user.id)
+    : [];
+  const hasListings = userListings.length > 0;
+
+  // Determine which tab is active for sub‑navs
+  const path = location.pathname;
+
+  // Determine home path based on current route
+  const homePath = path.startsWith("/host") ? "/host" : "/";
+
+  // Host dashboard tabs
+  const hostTabs = [
+    { label: "Listings", path: "/host" },
+    { label: "Calendar" },
+    { label: "Messages" },
+  ];
+
+  // Profile sub‑nav tabs
+  const profileTabs = [
+    { label: "My Trips", path: "/trips" },
+    { label: "Wishlists", path: "/wishlists" },
+    { label: "Profile", path: "/profile" },
+  ];
+
   return (
     <div className="relative w-full">
       <nav className="w-full h-16 md:h-20 border-b border-gray-200 flex items-center justify-between px-4 md:px-8 bg-white sticky top-0 z-50">
         {/* 1. Logo Section */}
-        <div className="flex items-center gap-2 cursor-pointer shrink-0">
-          {/* Use the Component Here */}
+        <div
+          className="flex items-center gap-2 cursor-pointer shrink-0"
+          onClick={() => navigate("/")}
+        >
           <StayNestLogo theme="light" width={40} height={45} />
-
           <span className="text-2xl font-bold tracking-tight">
             Stay<span className="text-[#FF385C]">Nest</span>
           </span>
         </div>
 
-        {/* 2. Search Bar Section (Center) - Hides on Mobile */}
-        <SearchBar />
+        {/* 2. Center Section (Search Bar or Tabs based on variant) */}
+        <div className="flex-1 flex justify-center hidden md:flex">
+          {variant === "default" && <SearchBar />}
 
-        {/* 3. Right Side Options (Right) - Hides on Mobile */}
+          {variant === "host-dashboard" && (
+            <div className="flex items-center gap-6">
+              {hostTabs.map((tab, index) => {
+                // 1. Check if the current path exactly matches the tab's path
+                let isActive = path === tab.path;
+
+                // 2. Make "Listings" (index 0) active by default if we are in a /host sub-route
+                //    and no other specific tab matches.
+                if (
+                  index === 0 &&
+                  path.startsWith("/host") &&
+                  !hostTabs.some((t, i) => i !== 0 && t.path && path.includes(t.path))
+                ) {
+                  isActive = true;
+                }
+
+                return (
+                  <button
+                    key={tab.label} // Changed to tab.label since some paths are currently undefined
+                    onClick={() => tab.path && navigate(tab.path)}
+                    className={`text-sm font-medium pb-1 border-b-2 transition-colors mt-1 ${isActive
+                        ? "border-black text-black"
+                        : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"
+                      }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {variant === "profile" && (
+            <div className="flex items-center gap-6">
+              {profileTabs.map((tab) => (
+                <button
+                  key={tab.path}
+                  onClick={() => navigate(tab.path)}
+                  className={`text-sm font-medium pb-1 border-b-2 transition-colors mt-1 ${path === tab.path
+                    ? "border-black text-black"
+                    : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {variant === "auth" && <div />} {/* empty center */}
+        </div>
+
+        {/* 3. Right Side Options */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
           {/* Dark Mode Toggle */}
           <button className="p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center border border-transparent hover:border-gray-200">
@@ -71,87 +166,140 @@ export default function Navbar({ type }) {
               />
             </svg>
           </button>
-          {/* Switch to hosting */}
-          <button onClick={handleSwitch} className="text-sm font-medium text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-full transition-colors hidden lg:block">
-            {` Switch to ${type}`}
-          </button>
 
-          {/* Profile circle "S" */}
-          <button className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 font-semibold flex items-center justify-center hover:ring-2 hover:ring-emerald-200 transition">
-            S
-          </button>
-
-          {/* Hamburger with dropdown */}
-          <div className="relative" ref={profileMenuRef}>
+          {/* Switch button – only for default & host-dashboard */}
+          {(variant === "default" || variant === "host-dashboard") && (
             <button
-              onClick={() => setIsProfileMenuOpen((v) => !v)}
-              className="w-9 h-9 rounded-full border border-gray-200 bg-white hover:shadow-md transition-shadow flex items-center justify-center"
+              onClick={handleSwitch}
+              className="text-sm font-medium text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-full transition-colors hidden lg:block"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-4 h-4 text-gray-700"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 18h16.5" />
-              </svg>
+              {variant === "default" && !user ? "Nest Your Home" : ` Switch to ${type}`}
             </button>
+          )}
 
-            {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden">
-                <ProfileMenuItem icon="heart" label="Wishlists" />
-                <ProfileMenuItem icon="airbnb" label="Trips" />
-                <ProfileMenuItem icon="message" label="Messages" />
-                <ProfileMenuItem icon="profile" label="Profile" />
-                <div className="h-px bg-gray-100 my-2" />
-                <ProfileMenuItem icon="bell" label="Notifications" />
-                <ProfileMenuItem icon="settings" label="Account settings" />
-                <ProfileMenuItem icon="globe" label="Languages & currency" />
-                <ProfileMenuItem icon="help" label="Help Centre" />
-                <div className="h-px bg-gray-100 my-2" />
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors flex items-start gap-3">
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold text-gray-900">Become a host</div>
-                    <div className="text-xs text-gray-500 mt-0.5">
-                      It's easy to start hosting and earn extra income.
-                    </div>
-                  </div>
-                  <div className="w-10 h-10 shrink-0 flex items-center justify-center text-2xl">🧑‍💼</div>
-                </button>
-                <div className="h-px bg-gray-100 my-2" />
-                <button className="w-full text-left px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-50 transition-colors">
-                  Refer a host
-                </button>
-                <button className="w-full text-left px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-50 transition-colors">
-                  Find a co-host
-                </button>
-                <div className="h-px bg-gray-100 my-2" />
-                <button className="w-full text-left px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-50 transition-colors">
-                  Log out
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Profile circle – show only if logged in and not in auth variant */}
+          {user && variant !== "auth" && (
+            <button className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 font-semibold flex items-center justify-center hover:ring-2 hover:ring-emerald-200 transition overflow-hidden">
+              {user.profilePhoto ? (
+                <img
+                  src={user.profilePhoto}
+                  alt={user.name || "User"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                userInitial
+              )}
+            </button>
+          )}
+
+          {/* Hamburger with dropdown – show only if not in auth variant */}
+          {variant !== "auth" && (
+            <div className="relative" ref={profileMenuRef}>
+              <button
+                onClick={() => setIsProfileMenuOpen((v) => !v)}
+                className="w-9 h-9 rounded-full border border-gray-200 bg-white hover:shadow-md transition-shadow flex items-center justify-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-4 h-4 text-gray-700"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 18h16.5" />
+                </svg>
+              </button>
+
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden">
+                  {user ? (
+                    <>
+                      {/* Home – visible only when NOT on / or /host */}
+                      {path !== "/" && path !== "/host" && (
+                        <>
+                          <ProfileMenuItem
+                            icon="home"
+                            label="Home"
+                            onClick={() => { navigate(homePath); setIsProfileMenuOpen(false); }}
+                          />
+                          <div className="h-px bg-gray-100 my-2" />
+                        </>
+                      )}
+
+                      <ProfileMenuItem
+                        icon="heart"
+                        label="Wishlists"
+                        onClick={() => { navigate("/wishlists"); setIsProfileMenuOpen(false); }}
+                      />
+                      <ProfileMenuItem
+                        icon="airbnb"
+                        label="Trips"
+                        onClick={() => { navigate("/trips"); setIsProfileMenuOpen(false); }}
+                      />
+                      <ProfileMenuItem
+                        icon="profile"
+                        label="Profile"
+                        onClick={() => { navigate("/profile"); setIsProfileMenuOpen(false); }}
+                      />
+
+                      {/* "Become a Host" – only if user has no listings */}
+                      {!hasListings && (
+                        <>
+                          <div className="h-px bg-gray-100 my-2" />
+                          <ProfileMenuItem
+                            icon="home"
+                            label="Become a Host"
+                            onClick={() => { navigate("/host/create"); setIsProfileMenuOpen(false); }}
+                          />
+                        </>
+                      )}
+
+                      <div className="h-px bg-gray-100 my-2" />
+                      <ProfileMenuItem
+                        icon="logout"
+                        label="Log out"
+                        onClick={handleLogout}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <ProfileMenuItem
+                        icon="login"
+                        label="Log in"
+                        onClick={() => { navigate("/login"); setIsProfileMenuOpen(false); }}
+                      />
+                      <ProfileMenuItem
+                        icon="signup"
+                        label="Sign up"
+                        onClick={() => { navigate("/signup"); setIsProfileMenuOpen(false); }}
+                      />
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* 4. Mobile Menu Button (Only visible on small screens) */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="block md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors relative z-50"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6"
+        {/* 4. Mobile Menu Button (Only visible on small screens and not in auth variant) */}
+        {variant !== "auth" && (
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="block md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors relative z-50"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 18h16.5" />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 18h16.5" />
+            </svg>
+          </button>
+        )}
       </nav>
 
       {/* 5. Mobile Menu Dropdown (Mobile & Tablet < md) */}
@@ -231,6 +379,7 @@ export default function Navbar({ type }) {
   );
 }
 
+// SVG paths for icons
 const paths = {
   heart: (
     <path
@@ -246,13 +395,6 @@ const paths = {
       d="M12 3l9 15.5a3.5 3.5 0 01-6.062 3.5L12 17l-2.938 5a3.5 3.5 0 01-6.062-3.5L12 3z"
     />
   ),
-  message: (
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.76 9.76 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
-    />
-  ),
   profile: (
     <path
       strokeLinecap="round"
@@ -260,39 +402,44 @@ const paths = {
       d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
     />
   ),
-  bell: (
+  logout: (
+    <>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+      />
+    </>
+  ),
+  login: (
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
+      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
     />
   ),
-  settings: (
+  signup: (
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
+      d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"
     />
   ),
-  globe: (
+  home: (
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
-    />
-  ),
-  help: (
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
+      d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
     />
   ),
 };
 
-function ProfileMenuItem({ icon, label }) {
+function ProfileMenuItem({ icon, label, onClick }) {
   return (
-    <button className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left">
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

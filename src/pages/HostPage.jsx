@@ -13,7 +13,7 @@ export default function HostPage() {
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'Nunito, sans-serif' }}>
-      <Navbar type="travelling" />
+      <Navbar type="travelling" variant="host-dashboard" />
       <main className="px-8 md:px-16 py-12">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-extrabold">Your listing</h1>

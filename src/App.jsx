@@ -1,12 +1,20 @@
 // src/App.jsx
+import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+
+// Pages
 import HomePage from './pages/HomePage';
 import HostPage from './pages/HostPage';
-import HostWizard from './pages/HostWizard'; // new
+import HostWizard from './pages/HostWizard';
 import ListingPage from './pages/ListingPage';
 import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import ProfileSetupPage from './pages/ProfileSetupPage';
+import MyTripsPage from './pages/MyTripsPage';
+import WishlistsPage from './pages/WishlistsPage';
 
+// Data
 import amenities from './data/amenities';
 import bookings from "./data/bookings";
 import categories from './data/categories';
@@ -14,10 +22,10 @@ import listings from './data/listings';
 import locations from "./data/locations";
 import reviews from "./data/reviews";
 import users from './data/users';
-import { useEffect } from 'react';
 
 function App() {
   useEffect(() => {
+    // Initialize localStorage with default data if not already done
     if (!localStorage.getItem('app_initialized')) {
       // store all data
       localStorage.setItem("amenities", JSON.stringify(amenities));
@@ -39,6 +47,10 @@ function App() {
         <Route path="/host/create" element={<HostWizard />} />
         <Route path="/listing/:id" element={<ListingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/profile" element={<ProfileSetupPage />} />
+        <Route path="/trips" element={<MyTripsPage />} />
+        <Route path="/wishlists" element={<WishlistsPage />} />
       </Routes>
     </AuthProvider>
   );
