@@ -1,27 +1,43 @@
-﻿import { useState } from "react";
-import darkBg from "../assets/images/DarkBG.png";
-import lightBg from "../assets/images/LightBG.png";
+﻿import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import darkBg from '../assets/images/DarkBG.png';
+import lightBg from '../assets/images/LightBG.png';
 
-export default function LoginPage({ theme = "dark" }) {
-  const isDark = theme === "dark";
+export default function LoginPage({ theme = 'dark' }) {
+  const isDark = theme === 'dark';
   const bg = isDark ? darkBg : lightBg;
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError('');
+    const success = login(email, password);
+    if (success) {
+      navigate('/host');
+    } else {
+      setError('Invalid email or password');
+    }
+  };
 
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center px-4 py-10"
       style={{
         backgroundImage: `url(${bg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
       }}
     >
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
         <div className="relative flex items-center justify-center px-5 py-4 border-b border-gray-200">
-          <a
-            to="/"
+          <button
+            onClick={() => navigate('/')}
             className="absolute left-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
             aria-label="Close"
           >
@@ -29,7 +45,7 @@ export default function LoginPage({ theme = "dark" }) {
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
-          </a>
+          </button>
           <h2 className="text-base font-semibold text-gray-900">Login</h2>
         </div>
 
@@ -37,7 +53,7 @@ export default function LoginPage({ theme = "dark" }) {
           <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
           <p className="text-sm text-gray-600 mt-1">Login to your account!</p>
 
-          <form className="mt-6 space-y-3" onSubmit={(e) => e.preventDefault()}>
+          <form className="mt-6 space-y-3" onSubmit={handleSubmit}>
             <input
               type="email"
               placeholder="Email"
@@ -53,10 +69,12 @@ export default function LoginPage({ theme = "dark" }) {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition"
             />
 
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
             <button
               type="submit"
               className="w-full py-3 rounded-lg text-white font-semibold text-sm transition hover:opacity-90"
-              style={{ backgroundColor: "#FF385C" }}
+              style={{ backgroundColor: '#FF385C' }}
             >
               Continue
             </button>
@@ -83,10 +101,10 @@ export default function LoginPage({ theme = "dark" }) {
           </div>
 
           <p className="text-center text-sm text-gray-600 mt-5">
-            First time using Airbnb?{" "}
-            <a to="/signup" className="font-semibold text-gray-900 hover:underline">
+            First time using Airbnb?{' '}
+            <button onClick={() => navigate('/signup')} className="font-semibold text-gray-900 hover:underline">
               Create an account
-            </a>
+            </button>
           </p>
         </div>
       </div>
