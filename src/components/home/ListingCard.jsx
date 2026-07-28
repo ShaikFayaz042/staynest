@@ -1,10 +1,26 @@
 ﻿import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { isListingSaved, toggleListingWishlist } from "../../utils/wishlist";
+import { useState } from "react";
 
 export default function ListingCard({ listing }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [saveToggle, setSaveToggle] = useState(false);
+  const saved = isListingSaved(user?.id, listing.id);
 
   const handleClick = () => {
     navigate(`/listing/${listing.id}`);
+  };
+
+  const handleSaveClick = (e) => {
+    e.stopPropagation();
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    toggleListingWishlist(user.id, listing.id);
+    setSaveToggle(!saveToggle);
   };
 
   return (
@@ -23,7 +39,13 @@ export default function ListingCard({ listing }) {
           </div>
         )}
 
-        <i className="fa-regular fa-heart absolute right-3 top-3 text-2xl text-white drop-shadow-md transition hover:scale-110"></i>
+        <button
+          onClick={handleSaveClick}
+          className="absolute right-3 top-3 rounded-full bg-black/30 p-2 text-white backdrop-blur-sm transition hover:scale-110"
+          aria-label={saved ? "Remove from wishlist" : "Save to wishlist"}
+        >
+          <i className={`text-xl ${saved ? "fa-solid fa-heart text-[#fd4148]" : "fa-regular fa-heart"}`} />
+        </button>
       </div>
 
       {/* Details */}

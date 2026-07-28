@@ -1,14 +1,14 @@
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/common/Navbar";
+import { getUserWishlists } from "../utils/wishlist";
 
 export default function WishlistsPage() {
   const { user } = useAuth();
-  const wishlists = JSON.parse(localStorage.getItem("wishlists")) || [];
+  const wishlists = getUserWishlists(user?.id);
   const listings = JSON.parse(localStorage.getItem("listings")) || [];
 
-  const userWishlists = wishlists.filter(w => w.userId === user?.id);
-  const wishlistListingIds = userWishlists.flatMap(w => w.listingIds || []);
-  const wishlistListings = listings.filter(l => wishlistListingIds.includes(l.id));
+  const wishlistListingIds = wishlists.flatMap((list) => list.listingIds || []);
+  const wishlistListings = listings.filter((listing) => wishlistListingIds.includes(listing.id));
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900" style={{ fontFamily: "Nunito, sans-serif" }}>

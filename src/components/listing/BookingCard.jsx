@@ -1,6 +1,16 @@
-﻿import { useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+
+function parseDate(value) {
+  if (!value) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function hasDateOverlap(startA, endA, startB, endB) {
+  return startA < endB && endA > startB;
+}
 
 export default function BookingCard({ list }) {
   const { user } = useAuth();
@@ -16,6 +26,29 @@ export default function BookingCard({ list }) {
 
   const nights = checkIn && checkOut ? Math.max(0, Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24))) : 0;
   const total = pricePerNight * nights;
+
+  const conflictingBooking = useMemo(() => {
+    if (!checkIn || !checkOut || nights <= 0) return null;
+
+    const bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+    const start = parseDate(checkIn);
+    const end = parseDate(checkOut);
+
+    return bookings.find((booking) => {
+      if (booking.listingId !== list.id || booking.status === "cancelled") return false;
+      const bookingStart = parseDate(booking.checkIn);
+      const bookingEnd = parseDate(booking.checkOut);
+      return bookingStart && bookingEnd && hasDateOverlap(start, end, bookingStart, bookingEnd);
+    }) || null;
+  }, [checkIn, checkOut, list.id, nights]);
+
+  const availabilityMessage = useMemo(() => {
+    if (!conflictingBooking) return "";
+    if (user && conflictingBooking.userId === user.id) {
+      return `You already have a reservation for ${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}.`;
+    }
+    return `These dates are already reserved for this listing (${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}).`;
+  }, [conflictingBooking, user]);
 
   const handleGuestChange = (delta) => {
     const newVal = guests + delta;
@@ -39,6 +72,13 @@ export default function BookingCard({ list }) {
       return;
     }
 
+    if (conflictingBooking) {
+      setMessage(user && conflictingBooking.userId === user.id
+        ? `You already have a reservation for ${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}.`
+        : `These dates are already reserved for this listing (${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}).`);
+      return;
+    }
+
     const bookings = JSON.parse(localStorage.getItem("bookings")) || [];
     const maxId = bookings.reduce((max, b) => {
       const num = parseInt(b.id.replace("bk", ""));
@@ -57,6 +97,16 @@ export default function BookingCard({ list }) {
     };
     bookings.push(newBooking);
     localStorage.setItem("bookings", JSON.stringify(bookings));
+
+    const listings = JSON.parse(localStorage.getItem("listings")) || [];
+    const listingIndex = listings.findIndex((listing) => listing.id === list.id);
+    if (listingIndex !== -1) {
+      listings[listingIndex] = {
+        ...listings[listingIndex],
+        bookingIds: [...(listings[listingIndex].bookingIds || []), newBooking.id],
+      };
+      localStorage.setItem("listings", JSON.stringify(listings));
+    }
 
     setMessage("Booking confirmed! 🎉");
     setTimeout(() => setMessage(""), 4000);
@@ -155,15 +205,16 @@ export default function BookingCard({ list }) {
 
         <button
           onClick={handleReserve}
-          className="w-full rounded-full bg-linear-to-r from-[#E61E4D] to-[#D70466] py-3 text-base font-semibold text-white hover:opacity-90 transition-opacity"
+          disabled={Boolean(availabilityMessage)}
+          className={`w-full rounded-full bg-linear-to-r from-[#E61E4D] to-[#D70466] py-3 text-base font-semibold text-white transition-opacity ${availabilityMessage ? "cursor-not-allowed opacity-70" : "hover:opacity-90"}`}
         >
-          Reserve
+          {availabilityMessage ? "Unavailable" : "Reserve"}
         </button>
         <p className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">You won't be charged yet</p>
 
-        {message && (
-          <div className={`mt-3 text-sm text-center ${message.includes("confirmed") ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}>
-            {message}
+        {(availabilityMessage || message) && (
+          <div className={`mt-3 text-sm text-center ${message?.includes("confirmed") ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}>
+            {message || availabilityMessage}
           </div>
         )}
       </div>

@@ -36,6 +36,7 @@ function App() {
       localStorage.setItem("locations", JSON.stringify(locations));
       localStorage.setItem("reviews", JSON.stringify(reviews));
       localStorage.setItem("users", JSON.stringify(users));
+      localStorage.setItem("wishlists", JSON.stringify([]));
       localStorage.setItem('app_initialized', 'true');
     }
   }, []);

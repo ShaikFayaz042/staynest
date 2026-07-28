@@ -1,7 +1,23 @@
 ﻿import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { isListingSaved, toggleListingWishlist } from "../../utils/wishlist";
 
 export default function ImageGallery({ list }) {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const [saveToggle, setSaveToggle] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const saved = isListingSaved(user?.id, list.id);
+
+  const handleSaveClick = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    toggleListingWishlist(user.id, list.id);
+    setSaveToggle(!saveToggle);
+  };
 
   return (
     <section className="mt-4">
@@ -14,8 +30,8 @@ export default function ImageGallery({ list }) {
           <button className="flex items-center gap-1 underline">
             <i className="fa-solid fa-arrow-up-from-bracket" /> Share
           </button>
-          <button className="flex items-center gap-1 underline">
-            <i className="fa-regular fa-heart" /> Save
+          <button onClick={handleSaveClick} className="flex items-center gap-1 underline">
+            <i className={`${saved ? "fa-solid fa-heart text-[#fd4148]" : "fa-regular fa-heart"}`} /> {saved ? "Saved" : "Save"}
           </button>
         </div>
       </div>
