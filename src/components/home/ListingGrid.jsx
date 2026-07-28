@@ -1,8 +1,36 @@
-﻿const listings = JSON.parse(localStorage.getItem('listings')) || [];
-import ScrollRow from "./ScrollRow";
+﻿import { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import ScrollRow from './ScrollRow';
+
+const listings = JSON.parse(localStorage.getItem('listings')) || [];
 
 export default function ListingGrid() {
-  const groupedListings = listings.reduce((groups, listing) => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const query = params.get('q')?.trim().toLowerCase() || '';
+  const minGuests = parseInt(params.get('guests') || '0', 10);
+
+  const filteredListings = useMemo(() => {
+    return listings.filter((listing) => {
+      const matchesQuery = query
+        ? [
+            listing.location.city,
+            listing.location.state,
+            listing.location.country,
+            listing.title,
+            listing.description,
+          ]
+            .join(' ')
+            .toLowerCase()
+            .includes(query)
+        : true;
+
+      const matchesGuests = minGuests > 0 ? listing.guests >= minGuests : true;
+      return matchesQuery && matchesGuests;
+    });
+  }, [query, minGuests]);
+
+  const groupedListings = filteredListings.reduce((groups, listing) => {
     const city = listing.location.city;
 
     if (!groups[city]) {

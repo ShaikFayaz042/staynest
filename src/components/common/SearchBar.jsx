@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const DESTINATIONS = [
   { name: 'Goa, India', desc: 'Beaches & nightlife', icon: 'fa-umbrella-beach' },
@@ -12,7 +13,7 @@ const DESTINATIONS = [
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
-function Calendar({ month, year, selected, onSelect }) {
+function Calendar({ month, year, selected, rangeStart, rangeEnd, onSelect }) {
   const first = new Date(year, month, 1).getDay();
   const days = new Date(year, month + 1, 0).getDate();
   const cells = [];
@@ -20,6 +21,11 @@ function Calendar({ month, year, selected, onSelect }) {
   for (let d = 1; d <= days; d++) cells.push(d);
 
   const isSel = (d) => selected && selected.getFullYear() === year && selected.getMonth() === month && selected.getDate() === d;
+  const isInRange = (d) => {
+    if (!rangeStart || !rangeEnd) return false;
+    const current = new Date(year, month, d);
+    return current > rangeStart && current < rangeEnd;
+  };
   const today = new Date();
   const isPast = (d) => new Date(year, month, d) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -31,22 +37,35 @@ function Calendar({ month, year, selected, onSelect }) {
           <div key={w} className="text-xs text-gray-500 dark:text-gray-400 text-center py-1">{w}</div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">
-        {cells.map((d, i) => (
-          <button
-            key={i}
-            disabled={!d || isPast(d)}
-            onClick={() => d && onSelect(new Date(year, month, d))}
-            className={`aspect-square text-sm rounded-full transition-colors ${
-              !d ? 'invisible' :
-              isPast(d) ? 'text-gray-300 dark:text-gray-600 line-through cursor-not-allowed' :
-              isSel(d) ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold' :
-              'text-gray-800 dark:text-gray-200 hover:border hover:border-gray-900 dark:hover:border-white'
-            }`}
-          >
-            {d}
-          </button>
-        ))}
+      <div className="grid grid-cols-7 gap-0">
+        {cells.map((d, i) => {
+          const isStart = rangeStart && rangeStart.getFullYear() === year && rangeStart.getMonth() === month && rangeStart.getDate() === d;
+          const isEnd = rangeEnd && rangeEnd.getFullYear() === year && rangeEnd.getMonth() === month && rangeEnd.getDate() === d;
+          const inRange = isInRange(d);
+          const isRangeCell = isStart || isEnd || inRange;
+          const wrapperBg = isRangeCell ? 'bg-black' : '';
+          const wrapperRadius = isStart ? 'rounded-l-full' : isEnd ? 'rounded-r-full' : isRangeCell ? 'rounded-none' : '';
+
+          return (
+            <div
+              key={i}
+              className={`aspect-square ${!d ? '' : isRangeCell ? `p-0 ${wrapperRadius}` : 'p-0.5'} ${wrapperBg}`}
+            >
+              <button
+                disabled={!d || isPast(d)}
+                onClick={() => d && onSelect(new Date(year, month, d))}
+                className={`w-full h-full text-sm transition-colors flex items-center justify-center ${
+                  !d ? 'invisible' :
+                  isPast(d) ? 'text-gray-300 dark:text-gray-600 line-through cursor-not-allowed rounded-full bg-transparent' :
+                  isRangeCell ? 'bg-transparent text-white' :
+                  'rounded-full text-gray-800 dark:text-gray-200 hover:border hover:border-gray-900 dark:hover:border-white bg-transparent'
+                }`}
+              >
+                {d}
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -90,6 +109,8 @@ export default function SearchBar() {
   const whenRef = useRef(null);
   const whoRef = useRef(null);
   const [pill, setPill] = useState({ left: 0, width: 0, opacity: 0 });
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const onClick = (e) => {
@@ -98,6 +119,28 @@ export default function SearchBar() {
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q') || '';
+    const checkInParam = params.get('checkIn');
+    const checkOutParam = params.get('checkOut');
+    const guestCount = parseInt(params.get('guests') || '0', 10);
+
+    setWhere(q);
+    setCheckIn(null);
+    setCheckOut(null);
+    setGuests((prev) => ({ ...prev, adults: guestCount > 0 ? guestCount : prev.adults }));
+
+    if (checkInParam) {
+      const date = new Date(checkInParam);
+      if (!Number.isNaN(date.getTime())) setCheckIn(date);
+    }
+    if (checkOutParam) {
+      const date = new Date(checkOutParam);
+      if (!Number.isNaN(date.getTime())) setCheckOut(date);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     const refMap = { where: whereRef, when: whenRef, who: whoRef };
@@ -114,6 +157,26 @@ export default function SearchBar() {
 
   const totalGuests = guests.adults + guests.children;
   const fmt = (d) => d ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
+
+  const searchQuery = where.trim().toLowerCase();
+  const filteredDestinations = searchQuery
+    ? DESTINATIONS.filter((d) =>
+        d.name.toLowerCase().includes(searchQuery) ||
+        d.desc.toLowerCase().includes(searchQuery)
+      )
+    : DESTINATIONS;
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (where.trim()) params.set('q', where.trim());
+    if (checkIn) params.set('checkIn', checkIn.toISOString().slice(0, 10));
+    if (checkOut) params.set('checkOut', checkOut.toISOString().slice(0, 10));
+    if (totalGuests > 0) params.set('guests', totalGuests.toString());
+
+    const searchPath = params.toString() ? `/?${params.toString()}` : '/';
+    navigate(searchPath);
+    setActive(null);
+  };
 
   const dateLabel = checkIn && checkOut
     ? `${fmt(checkIn)} – ${fmt(checkOut)}`
@@ -163,7 +226,7 @@ export default function SearchBar() {
   return (
     <div
       ref={wrapRef}
-      className={`hidden md:flex flex-1 max-w-lg lg:max-w-xl mx-auto h-12 items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-shadow duration-200 relative px-1 py-0.5 ${
+      className={`hidden md:flex flex-1 max-w-lg lg:max-w-xl mx-auto h-12 items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-shadow duration-200 relative px-1 pt-2 pb-1 ${
         active ? 'bg-gray-100 dark:bg-gray-700 shadow-md' : 'shadow-sm hover:shadow-md'
       }`}
     >
@@ -178,12 +241,18 @@ export default function SearchBar() {
       />
 
       {/* Where */}
-      <button ref={whereRef} className={sectionCls('where')} onClick={() => setActive('where')}>
+      <div ref={whereRef} className={sectionCls('where')} onClick={() => setActive('where')}>
         <div className="text-xs font-bold text-gray-900 dark:text-white">Where</div>
-        <div className={`text-sm truncate ${where ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
-          {where || 'Search destinations'}
-        </div>
-      </button>
+        <input
+          type="text"
+          value={where}
+          onChange={(e) => setWhere(e.target.value)}
+          onFocus={() => setActive('where')}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          placeholder="Search destinations"
+          className="w-full bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none"
+        />
+      </div>
 
       <div className={`h-8 w-px bg-gray-200 dark:bg-gray-600 shrink-0 transition-opacity duration-200 ${active === 'where' || active === 'when' ? 'opacity-0' : ''}`}></div>
 
@@ -210,7 +279,7 @@ export default function SearchBar() {
             {guestLabel || 'Add guests'}
           </div>
         </button>
-        <button className="bg-[#FF385C] text-white rounded-full px-3 py-2 hover:bg-[#d90b35] transition-all duration-300 flex items-center justify-center shadow-md gap-2 shrink-0">
+        <button onClick={handleSearch} className="bg-[#FF385C] text-white rounded-full px-3 py-2 hover:bg-[#d90b35] transition-all duration-300 flex items-center justify-center shadow-md gap-2 shrink-0" type="button">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
@@ -223,9 +292,9 @@ export default function SearchBar() {
       {/* Where Popover */}
       {active === 'where' && (
         <div className="absolute left-0 top-full mt-3 w-[420px] max-w-[95vw] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 z-50">
-          <div className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Suggested destinations</div>
-          <div className="max-h-80 overflow-y-auto">
-            {DESTINATIONS.map((d) => (
+              <div className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Suggested destinations</div>
+          <div className="max-h-72 overflow-y-auto">
+            {filteredDestinations.length > 0 ? filteredDestinations.map((d) => (
               <button
                 key={d.name}
                 onClick={() => { setWhere(d.name); setActive('when'); }}
@@ -239,7 +308,9 @@ export default function SearchBar() {
                   <div className="text-xs text-gray-500 dark:text-gray-400">{d.desc}</div>
                 </div>
               </button>
-            ))}
+            )) : (
+              <div className="text-sm text-gray-500 dark:text-gray-400 p-3">No matching destinations found.</div>
+            )}
           </div>
         </div>
       )}
@@ -263,12 +334,16 @@ export default function SearchBar() {
               month={viewMonth}
               year={viewYear}
               selected={pickingOut ? checkIn : (checkOut || checkIn)}
+              rangeStart={checkIn}
+              rangeEnd={checkOut}
               onSelect={handleDatePick}
             />
             <Calendar
               month={viewMonth === 11 ? 0 : viewMonth + 1}
               year={viewMonth === 11 ? viewYear + 1 : viewYear}
               selected={pickingOut ? checkIn : (checkOut || checkIn)}
+              rangeStart={checkIn}
+              rangeEnd={checkOut}
               onSelect={handleDatePick}
             />
           </div>
