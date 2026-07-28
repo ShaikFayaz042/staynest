@@ -2,96 +2,87 @@ import { useEffect, useRef, useState } from "react";
 import ListingCard from "./ListingCard";
 
 export default function ScrollRow({ title, listings }) {
-    
-    const scrollerRef = useRef(null);
-    const [canPrev, setCanPrev] = useState(false);
-    const [canNext, setCanNext] = useState(true);
-    const [isScrollable, setIsScrollable] = useState(false);
+  const scrollerRef = useRef(null);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(true);
+  const [isScrollable, setIsScrollable] = useState(false);
 
-    function updateButtons() {
-        const el = scrollerRef.current;
-        if (!el) return;
-        const scrollable = el.scrollWidth > el.clientWidth + 1;
-        setIsScrollable(scrollable);
-        if (!scrollable) {
-            setCanPrev(false);
-            setCanNext(false);
-            return;
-        }
-        setCanPrev(el.scrollLeft > 4);
-        setCanNext(
-            el.scrollLeft + el.clientWidth < el.scrollWidth - 4
-        );
+  function updateButtons() {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const scrollable = el.scrollWidth > el.clientWidth + 1;
+    setIsScrollable(scrollable);
+    if (!scrollable) {
+      setCanPrev(false);
+      setCanNext(false);
+      return;
     }
+    setCanPrev(el.scrollLeft > 4);
+    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }
 
-    useEffect(() => {
-        updateButtons();
+  useEffect(() => {
+    updateButtons();
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateButtons, { passive: true });
+    window.addEventListener("resize", updateButtons);
+    return () => {
+      el.removeEventListener("scroll", updateButtons);
+      window.removeEventListener("resize", updateButtons);
+    };
+  }, []);
 
-        const el = scrollerRef.current;
-        if (!el) return;
-        el.addEventListener("scroll", updateButtons, {
-            passive: true,
-        });
-        window.addEventListener("resize", updateButtons);
-        return () => {
-            el.removeEventListener("scroll", updateButtons);
-            window.removeEventListener("resize", updateButtons);
-        };
-    }, []);
+  function scroll(direction) {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollBy({
+      left: direction * el.clientWidth * 0.9,
+      behavior: "smooth",
+    });
+  }
 
-    function scroll(direction) {
-        const el = scrollerRef.current;
-        if (!el) return;
-        el.scrollBy({
-            left: direction * el.clientWidth * 0.9,
-            behavior: "smooth",
-        });
-    }
+  return (
+    <section>
+      <div className="mb-4 flex items-center justify-between">
+        <button className="flex items-center gap-1 text-lg font-semibold text-gray-900 dark:text-white hover:underline">
+          {title}
+          <i className="fa-solid fa-angle-right mt-0.5 text-sm text-gray-700 dark:text-gray-400"></i>
+        </button>
 
-
-
-    return (
-        <section>
-            {/* Heading */}
-            <div className="mb-4 flex items-center justify-between">
-                <button className="flex items-center gap-1 text-lg font-semibold text-gray-900 hover:underline">
-                    {title}
-                    <i className="fa-solid fa-angle-right mt-0.5 text-sm text-gray-700"></i>
-                </button>
-
-                {isScrollable && (<div className="flex items-center gap-2">
-                    <button
-                        onClick={() => scroll(-1)}
-                        disabled={!canPrev}
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                        <i className="fa-solid fa-angle-left text-sm text-gray-700"></i>
-                    </button>
-
-                    <button
-                        onClick={() => scroll(1)}
-                        disabled={!canNext}
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                        <i className="fa-solid fa-angle-right text-sm text-gray-700"></i>
-                    </button>
-                </div>)}
-            </div>
-
-            {/* Cards */}
-            <div
-                ref={scrollerRef}
-                className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-2 pb-2 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        {isScrollable && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => scroll(-1)}
+              disabled={!canPrev}
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
             >
-                {listings.map((listing) => (
-                    <div
-                        key={listing.id}
-                        className="w-[calc((100%-1.5rem)/2)] shrink-0 snap-start sm:w-[calc((100%-3rem)/3)] md:w-[calc((100%-4.5rem)/4)] lg:w-[calc((100%-6rem)/5)]"
-                    >
-                        <ListingCard listing={listing} />
-                    </div>
-                ))}
-            </div>
-        </section>
-    );
+              <i className="fa-solid fa-angle-left text-sm text-gray-700 dark:text-gray-300"></i>
+            </button>
+            <button
+              onClick={() => scroll(1)}
+              disabled={!canNext}
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <i className="fa-solid fa-angle-right text-sm text-gray-700 dark:text-gray-300"></i>
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div
+        ref={scrollerRef}
+        className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-2 pb-2 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {listings.map((listing) => (
+          <div
+            key={listing.id}
+            className="w-[calc((100%-1.5rem)/2)] shrink-0 snap-start sm:w-[calc((100%-3rem)/3)] md:w-[calc((100%-4.5rem)/4)] lg:w-[calc((100%-6rem)/5)]"
+          >
+            <ListingCard listing={listing} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }

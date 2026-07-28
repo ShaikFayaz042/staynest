@@ -1,28 +1,57 @@
-﻿import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 
 export default function FooterLogoAnimation() {
   const pathRef = useRef(null);
+  const containerRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const path = pathRef.current;
-    if (!path) return;
+    const container = containerRef.current;
+
+    if (!path || !container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.25 }
+    );
+
+    observer.observe(container);
+
     const length = path.getTotalLength();
     path.style.strokeDasharray = String(length);
     path.style.strokeDashoffset = String(length);
-    path.animate(
-      [{ strokeDashoffset: length }, { strokeDashoffset: 0 }],
-      { duration: 1600, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" }
-    );
-  }, []);
+
+    if (isVisible) {
+      path.animate(
+        [{ strokeDashoffset: length }, { strokeDashoffset: 0 }],
+        { duration: 1600, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" }
+      );
+    }
+
+    return () => observer.disconnect();
+  }, [isVisible]);
 
   return (
     <>
       <style>{`
         .sn-fla-container {
-        margin-left:50px;
+          margin-left:50px;
           display: flex;
           flex-direction: column;
           align-items: center;
+          opacity: 0;
+          transform: translateY(24px);
+          transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16,1,0.3,1);
+        }
+        .sn-fla-container.is-visible {
+          opacity: 1;
+          transform: translateY(0);
           animation: sn-fla-float 4s ease-in-out infinite 3s;
         }
         .sn-fla-mark {
@@ -43,12 +72,22 @@ export default function FooterLogoAnimation() {
           fill: #1e272e;
           opacity: 0;
           transform: scale(0);
+          transition: fill 0.3s ease;
         }
-        .sn-fla-w1 { transform-origin: 90.55px 82px; animation: sn-fla-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.1s forwards; }
-        .sn-fla-w2 { transform-origin: 109.45px 82px; animation: sn-fla-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.25s forwards; }
-        .sn-fla-w3 { transform-origin: 90.55px 100px; animation: sn-fla-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.4s forwards; }
-        .sn-fla-w4 { transform-origin: 109.45px 100px; animation: sn-fla-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.55s forwards; }
+        .sn-fla-container.is-visible .sn-fla-window {
+          opacity: 1;
+          transform: scale(1);
+        }
+        .dark .sn-fla-window {
+          fill: #f8fafc;
+        }
+        /* Windows unchanged */
+        .sn-fla-container.is-visible .sn-fla-w1 { transform-origin: 90.55px 82px; animation: sn-fla-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.1s forwards; }
+        .sn-fla-container.is-visible .sn-fla-w2 { transform-origin: 109.45px 82px; animation: sn-fla-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.25s forwards; }
+        .sn-fla-container.is-visible .sn-fla-w3 { transform-origin: 90.55px 100px; animation: sn-fla-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.4s forwards; }
+        .sn-fla-container.is-visible .sn-fla-w4 { transform-origin: 109.45px 100px; animation: sn-fla-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 1.55s forwards; }
 
+        /* Text colors – now using CSS variables to adapt to dark mode */
         .sn-fla-text {
           display: flex;
           font-family: 'Montserrat', sans-serif;
@@ -58,21 +97,42 @@ export default function FooterLogoAnimation() {
           overflow: hidden;
           padding: 10px 20px;
         }
-        .sn-fla-stay { color: #1e272e; transform: translateY(100%); opacity: 0;
-          animation: sn-fla-slide 0.8s cubic-bezier(0.16,1,0.3,1) 1.8s forwards; }
-        .sn-fla-nest { color: #ff4757; transform: translateY(100%); opacity: 0;
-          animation: sn-fla-slide 0.8s cubic-bezier(0.16,1,0.3,1) 1.95s forwards; }
+        .sn-fla-stay {
+          color: #1e272e;
+          transform: translateY(100%);
+          opacity: 0;
+          transition: color 0.3s ease;
+        }
+        .dark .sn-fla-stay {
+          color: #f8fafc;
+        }
+        .sn-fla-container.is-visible .sn-fla-stay {
+          animation: sn-fla-slide 0.8s cubic-bezier(0.16,1,0.3,1) 1.8s forwards;
+        }
+        .sn-fla-nest { color: #ff4757; transform: translateY(100%); opacity: 0; }
+        .sn-fla-container.is-visible .sn-fla-nest {
+          animation: sn-fla-slide 0.8s cubic-bezier(0.16,1,0.3,1) 1.95s forwards;
+        }
 
         .sn-fla-tagline {
           display: flex; align-items: center; gap: 12px;
-          font-family: 'Poppins', 'Inter', 'Segoe UI', sans-serif; color: #334155;
+          font-family: 'Poppins', 'Inter', 'Segoe UI', sans-serif;
+          color: #334155;
           font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
-          text-transform: uppercase; opacity: 0; transform: translateY(10px);
+          text-transform: uppercase;
+          opacity: 0; transform: translateY(10px);
+          transition: color 0.3s ease;
+        }
+        .sn-fla-container.is-visible .sn-fla-tagline {
           animation: sn-fla-fadeup 0.8s ease-out 2.4s forwards;
         }
+        .dark .sn-fla-tagline { color: #cbd5e1; }
+
         .sn-fla-line {
           height: 2px; width: 40px; background-color: #ff4757;
           border-radius: 2px; opacity: 0; transform: scaleX(0);
+        }
+        .sn-fla-container.is-visible .sn-fla-line {
           animation: sn-fla-expand 0.6s cubic-bezier(0.16,1,0.3,1) 2.6s forwards;
         }
 
@@ -87,7 +147,7 @@ export default function FooterLogoAnimation() {
         @keyframes sn-fla-float { 0%{transform:translateY(0)} 50%{transform:translateY(-6px)} 100%{transform:translateY(0)} }
       `}</style>
 
-      <div className="sn-fla-container">
+      <div ref={containerRef} className={`sn-fla-container ${isVisible ? "is-visible" : ""}`}>
         <svg className="sn-fla-mark" viewBox="0 0 210 250" xmlns="http://www.w3.org/2000/svg">
           <path
             ref={pathRef}

@@ -1,8 +1,8 @@
 ﻿export default function MapSection() {
   return (
-    <section className="border-b border-gray-200 py-8">
-      <h3 className="text-xl font-semibold text-gray-900">Where you'll be</h3>
-      <p className="mt-1 text-sm text-gray-700">Baga, Goa, India</p>
+    <section className="border-b border-gray-200 dark:border-gray-700 py-8">
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Where you'll be</h3>
+      <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">Baga, Goa, India</p>
       <div className="mt-4 h-105 overflow-hidden rounded-2xl">
         <img
           src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1200"

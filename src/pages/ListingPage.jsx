@@ -17,11 +17,11 @@ export default function ListingPage() {
   const listing = listings.find(l => l.id === id);
 
   if (!listing) {
-    return <div className="text-center py-20">Listing not found</div>;
+    return <div className="text-center py-20 text-gray-900 dark:text-white">Listing not found</div>;
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       <Navbar />
       <div className="mx-auto max-w-7xl px-6 pb-12">
         <ImageGallery list={listing} />

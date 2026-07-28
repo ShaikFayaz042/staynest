@@ -85,25 +85,25 @@ export default function AmenitiesStep() {
   return (
     <HostFrame progress={[1, 0.2, 0]} nextDisabled={false}>
       <div className="max-w-4xl mx-auto px-8 md:px-16 py-8">
-        <h1 className="text-4xl font-extrabold text-gray-900">
+        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">
           Tell guests what your place has to offer
         </h1>
-        <p className="mt-3 text-gray-600">
+        <p className="mt-3 text-gray-600 dark:text-gray-300">
           You can add more amenities after you publish your listing.
         </p>
 
         {/* Selection status with validation */}
         <div className="mt-2 flex items-center gap-3">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Selected: <span className="font-semibold">{selectedIds.length}</span> amenities
           </p>
           {!isEnough && (
-            <span className="text-sm text-red-500 font-medium">
+            <span className="text-sm text-red-500 dark:text-red-400 font-medium">
               (Need at least 4)
             </span>
           )}
           {isEnough && (
-            <span className="text-sm text-green-600 font-medium">
+            <span className="text-sm text-[#FF385C] font-medium">
               ✓ Good to go
             </span>
           )}
@@ -115,7 +115,7 @@ export default function AmenitiesStep() {
           if (!items.length) return null;
           return (
             <div key={categoryKey} className="mt-8">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">
                 {CATEGORY_LABELS[categoryKey]}
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -127,14 +127,14 @@ export default function AmenitiesStep() {
                       onClick={() => toggleAmenity(item.id)}
                       className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
                         selected
-                          ? "border-black border-2 bg-gray-50 shadow-sm"
-                          : "border-gray-200 hover:border-gray-400"
+                          ? "border-[#FF385C] border-2 bg-rose-50 dark:bg-gray-800 shadow-sm"
+                          : "border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-900"
                       }`}
                     >
-                      <i className={`${item.icon} text-xl text-gray-700`} />
-                      <span className="text-sm font-medium">{item.name}</span>
+                      <i className={`${item.icon} text-xl text-gray-700 dark:text-gray-200`} />
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">{item.name}</span>
                       {selected && (
-                        <span className="ml-auto text-green-600">
+                        <span className="ml-auto text-[#FF385C]">
                           <i className="fa-solid fa-check" />
                         </span>
                       )}

@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import StayNestLogo from "../../assets/logos/StayNestLogo";
 import SearchBar from "./SearchBar";
-
+import ThemeToggle from "./ThemeToggle"; // ✅ imported ThemeToggle
+// import { ThemeContext } from "../../context/ThemeContext";
 export default function Navbar({
   type = "hosting",
   variant = "default", // 'default' | 'host-dashboard' | 'profile' | 'auth'
@@ -57,7 +58,7 @@ export default function Navbar({
     : [];
   const hasListings = userListings.length > 0;
 
-  // Determine which tab is active for sub‑navs
+  // Determine which tab is active for sub-navs
   const path = location.pathname;
 
   // Determine home path based on current route
@@ -70,7 +71,7 @@ export default function Navbar({
     { label: "Messages" },
   ];
 
-  // Profile sub‑nav tabs
+  // Profile sub-nav tabs
   const profileTabs = [
     { label: "My Trips", path: "/trips" },
     { label: "Wishlists", path: "/wishlists" },
@@ -79,14 +80,14 @@ export default function Navbar({
 
   return (
     <div className="relative w-full">
-      <nav className="w-full h-16 md:h-20 border-b border-gray-200 flex items-center justify-between px-4 md:px-8 bg-white sticky top-0 z-50">
+      <nav className="w-full h-16 md:h-20 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 md:px-8 bg-white dark:bg-gray-900 sticky top-0 z-50">
         {/* 1. Logo Section */}
         <div
           className="flex items-center gap-2 cursor-pointer shrink-0"
           onClick={() => navigate("/")}
         >
-          <StayNestLogo theme="light" width={40} height={45} />
-          <span className="text-2xl font-bold tracking-tight">
+          <StayNestLogo width={40} height={45} />
+          <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Stay<span className="text-[#FF385C]">Nest</span>
           </span>
         </div>
@@ -98,11 +99,7 @@ export default function Navbar({
           {variant === "host-dashboard" && (
             <div className="flex items-center gap-6">
               {hostTabs.map((tab, index) => {
-                // 1. Check if the current path exactly matches the tab's path
                 let isActive = path === tab.path;
-
-                // 2. Make "Listings" (index 0) active by default if we are in a /host sub-route
-                //    and no other specific tab matches.
                 if (
                   index === 0 &&
                   path.startsWith("/host") &&
@@ -113,12 +110,13 @@ export default function Navbar({
 
                 return (
                   <button
-                    key={tab.label} // Changed to tab.label since some paths are currently undefined
+                    key={tab.label}
                     onClick={() => tab.path && navigate(tab.path)}
-                    className={`text-sm font-medium pb-1 border-b-2 transition-colors mt-1 ${isActive
-                        ? "border-black text-black"
-                        : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"
-                      }`}
+                    className={`text-sm font-medium pb-1 border-b-2 transition-colors mt-1 ${
+                      isActive
+                        ? "border-black dark:border-white text-black dark:text-white"
+                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600"
+                    }`}
                   >
                     {tab.label}
                   </button>
@@ -133,10 +131,11 @@ export default function Navbar({
                 <button
                   key={tab.path}
                   onClick={() => navigate(tab.path)}
-                  className={`text-sm font-medium pb-1 border-b-2 transition-colors mt-1 ${path === tab.path
-                    ? "border-black text-black"
-                    : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"
-                    }`}
+                  className={`text-sm font-medium pb-1 border-b-2 transition-colors mt-1 ${
+                    path === tab.path
+                      ? "border-black dark:border-white text-black dark:text-white"
+                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600"
+                  }`}
                 >
                   {tab.label}
                 </button>
@@ -150,36 +149,24 @@ export default function Navbar({
         {/* 3. Right Side Options */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
           {/* Dark Mode Toggle */}
-          <button className="p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center border border-transparent hover:border-gray-200">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-              />
-            </svg>
-          </button>
+          <ThemeToggle />
 
-          {/* Switch button – only for default & host-dashboard */}
+          {/* Switch button - only for default & host-dashboard */}
           {(variant === "default" || variant === "host-dashboard") && (
             <button
               onClick={handleSwitch}
-              className="text-sm font-medium text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-full transition-colors hidden lg:block"
+              className="text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-full transition-colors hidden lg:block"
             >
               {variant === "default" && !user ? "Nest Your Home" : ` Switch to ${type}`}
             </button>
           )}
 
-          {/* Profile circle – show only if logged in and not in auth variant */}
+          {/* Profile circle - show only if logged in and not in auth variant */}
           {user && variant !== "auth" && (
-            <button className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 font-semibold flex items-center justify-center hover:ring-2 hover:ring-emerald-200 transition overflow-hidden">
+            <button
+              onClick={() => navigate("/profile")}
+              className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-100 font-semibold flex items-center justify-center hover:ring-2 hover:ring-rose-200 dark:hover:ring-rose-500/50 transition overflow-hidden"
+            >
               {user.profilePhoto ? (
                 <img
                   src={user.profilePhoto}
@@ -192,12 +179,12 @@ export default function Navbar({
             </button>
           )}
 
-          {/* Hamburger with dropdown – show only if not in auth variant */}
+          {/* Hamburger with dropdown - show only if not in auth variant */}
           {variant !== "auth" && (
             <div className="relative" ref={profileMenuRef}>
               <button
                 onClick={() => setIsProfileMenuOpen((v) => !v)}
-                className="w-9 h-9 rounded-full border border-gray-200 bg-white hover:shadow-md transition-shadow flex items-center justify-center"
+                className="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-shadow flex items-center justify-center"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -205,17 +192,17 @@ export default function Navbar({
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-4 h-4 text-gray-700"
+                  className="w-4 h-4 text-gray-700 dark:text-gray-300"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 18h16.5" />
                 </svg>
               </button>
 
               {isProfileMenuOpen && (
-                <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden">
+                <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 py-2 z-50 overflow-hidden">
                   {user ? (
                     <>
-                      {/* Home – visible only when NOT on / or /host */}
+                      {/* Home - visible only when NOT on / or /host */}
                       {path !== "/" && path !== "/host" && (
                         <>
                           <ProfileMenuItem
@@ -223,7 +210,7 @@ export default function Navbar({
                             label="Home"
                             onClick={() => { navigate(homePath); setIsProfileMenuOpen(false); }}
                           />
-                          <div className="h-px bg-gray-100 my-2" />
+                          <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
                         </>
                       )}
 
@@ -243,10 +230,10 @@ export default function Navbar({
                         onClick={() => { navigate("/profile"); setIsProfileMenuOpen(false); }}
                       />
 
-                      {/* "Become a Host" – only if user has no listings */}
+                      {/* "Become a Host" - only if user has no listings */}
                       {!hasListings && (
                         <>
-                          <div className="h-px bg-gray-100 my-2" />
+                          <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
                           <ProfileMenuItem
                             icon="home"
                             label="Become a Host"
@@ -255,7 +242,7 @@ export default function Navbar({
                         </>
                       )}
 
-                      <div className="h-px bg-gray-100 my-2" />
+                      <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
                       <ProfileMenuItem
                         icon="logout"
                         label="Log out"
@@ -286,7 +273,7 @@ export default function Navbar({
         {variant !== "auth" && (
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="block md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors relative z-50"
+            className="block md:hidden p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative z-50"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -294,7 +281,7 @@ export default function Navbar({
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6"
+              className="w-6 h-6 text-gray-800 dark:text-gray-200"
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 18h16.5" />
             </svg>
@@ -304,25 +291,26 @@ export default function Navbar({
 
       {/* 5. Mobile Menu Dropdown (Mobile & Tablet < md) */}
       <div
-        className={`md:hidden fixed top-16 left-0 w-full bg-white border-b border-gray-200 shadow-lg transition-all duration-300 ease-in-out overflow-hidden z-40 ${isMobileMenuOpen ? "max-h-125 opacity-100 visible" : "max-h-0 opacity-0 invisible"
-          }`}
+        className={`md:hidden fixed top-16 left-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-lg transition-all duration-300 ease-in-out overflow-hidden z-40 ${
+          isMobileMenuOpen ? "max-h-125 opacity-100 visible" : "max-h-0 opacity-0 invisible"
+        }`}
       >
         <div className="flex flex-col p-4 space-y-4">
-          <div className="flex flex-col space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
-            <button className="text-left px-3 py-2 hover:bg-white rounded-md transition-colors">
-              <div className="text-xs font-bold text-gray-900">Where</div>
-              <div className="text-sm text-gray-500">Search destinations</div>
+          <div className="flex flex-col space-y-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-100 dark:border-gray-700">
+            <button className="text-left px-3 py-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors">
+              <div className="text-xs font-bold text-gray-900 dark:text-white">Where</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Search destinations</div>
             </button>
-            <div className="h-px w-full bg-gray-200"></div>
-            <button className="text-left px-3 py-2 hover:bg-white rounded-md transition-colors">
-              <div className="text-xs font-bold text-gray-900">When</div>
-              <div className="text-sm text-gray-500">Add dates</div>
+            <div className="h-px w-full bg-gray-200 dark:bg-gray-700"></div>
+            <button className="text-left px-3 py-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors">
+              <div className="text-xs font-bold text-gray-900 dark:text-white">When</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Add dates</div>
             </button>
-            <div className="h-px w-full bg-gray-200"></div>
+            <div className="h-px w-full bg-gray-200 dark:bg-gray-700"></div>
             <div className="flex items-center justify-between px-3 py-2">
               <div>
-                <div className="text-xs font-bold text-gray-900">Who</div>
-                <div className="text-sm text-gray-500">Add guests</div>
+                <div className="text-xs font-bold text-gray-900 dark:text-white">Who</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Add guests</div>
               </div>
               <button className="bg-[#FF385C] text-white rounded-full p-2 hover:bg-[#d90b35] transition-colors shadow-md">
                 <svg
@@ -343,27 +331,14 @@ export default function Navbar({
             </div>
           </div>
 
-          <div className="flex flex-col space-y-2 pt-2 border-t border-gray-100">
-            <button className="text-left font-medium text-gray-800 px-3 py-3 hover:bg-gray-100 rounded-md transition-colors">
+          <div className="flex flex-col space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+            <button className="text-left font-medium text-gray-800 dark:text-gray-200 px-3 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
               Nest Your Home
             </button>
-            <button className="flex items-center justify-between px-3 py-3 hover:bg-gray-100 rounded-md transition-colors">
-              <span className="font-medium text-gray-800">Dark mode</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-                />
-              </svg>
-            </button>
+            <div className="flex items-center justify-between px-3 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
+              <span className="font-medium text-gray-800 dark:text-gray-200">Dark mode</span>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </div>
@@ -371,7 +346,7 @@ export default function Navbar({
       {/* 6. Mobile Overlay (Clicking outside closes menu) */}
       {isMobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/20 z-30 top-16"
+          className="md:hidden fixed inset-0 bg-black/20 dark:bg-black/40 z-30 top-16"
           onClick={() => setIsMobileMenuOpen(false)}
         ></div>
       )}
@@ -379,7 +354,7 @@ export default function Navbar({
   );
 }
 
-// SVG paths for icons
+// SVG paths for icons 
 const paths = {
   heart: (
     <path
@@ -438,7 +413,7 @@ function ProfileMenuItem({ icon, label, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
+      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -446,11 +421,11 @@ function ProfileMenuItem({ icon, label, onClick }) {
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="w-5 h-5 text-gray-800"
+        className="w-5 h-5 text-gray-800 dark:text-gray-200"
       >
         {paths[icon]}
       </svg>
-      <span className="text-sm text-gray-900">{label}</span>
+      <span className="text-sm text-gray-900 dark:text-gray-100">{label}</span>
     </button>
   );
 }

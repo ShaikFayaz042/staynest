@@ -235,23 +235,20 @@ export default function HostWizard() {
     // Success screen
     <div className="max-w-2xl mx-auto px-8 md:px-16 py-20 text-center">
       <div className="text-6xl mb-6">🎉</div>
-      <h1 className="text-4xl font-extrabold text-gray-900">Your listing is ready!</h1>
-      <p className="mt-3 text-gray-600">You can now view it on your dashboard.</p>
+      <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">Your listing is ready!</h1>
+      <p className="mt-3 text-gray-600 dark:text-gray-400">You can now view it on your dashboard.</p>
       <button
         onClick={() => {
-          // 1. Check if user is logged in
           if (!user) {
             alert("You must be logged in to publish a listing.");
             navigate("/login");
             return;
           }
-
-          // 2. Publish the listing (no extra validation – step validations already passed)
           const newListing = createListing(formData, user);
           saveListing(newListing);
           navigate("/host");
         }}
-        className="mt-8 px-6 py-3 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800"
+        className="mt-8 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-lg text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-200"
       >
         Go to Dashboard
       </button>
@@ -276,7 +273,7 @@ export default function HostWizard() {
 
   return (
     <HostNavContext.Provider value={{ onNext, onBack, inWizard: true, index, total, formData, setFormData, nextDisabled }}>
-      <div className="h-screen overflow-hidden" style={{ fontFamily: "Nunito, sans-serif" }}>
+      <div className="h-screen overflow-hidden bg-gray-50 dark:bg-gray-950" style={{ fontFamily: "Nunito, sans-serif" }}>
         <div
           className="flex h-full transition-transform duration-500 ease-in-out"
           style={{
@@ -292,12 +289,12 @@ export default function HostWizard() {
         </div>
 
         {!isLast && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+          <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 z-40">
             <div className="grid grid-cols-3 gap-2">
               {progress.map((p, i) => (
-                <div key={i} className="h-1 bg-gray-200 relative overflow-hidden">
+                <div key={i} className="h-1 bg-gray-200 dark:bg-gray-800 relative overflow-hidden">
                   <div
-                    className="h-full bg-black transition-all duration-500"
+                    className="h-full bg-[#fd4148] transition-all duration-500"
                     style={{ width: `${p * 100}%` }}
                   />
                 </div>
@@ -307,20 +304,20 @@ export default function HostWizard() {
               <button
                 onClick={onBack}
                 disabled={index === 0}
-                className={`text-sm font-semibold underline ${index === 0 ? "text-gray-300 cursor-not-allowed no-underline" : "text-gray-900"
+                className={`text-sm font-semibold underline ${index === 0 ? "text-gray-300 dark:text-gray-600 cursor-not-allowed no-underline" : "text-gray-900 dark:text-gray-100"
                   }`}
               >
                 Back
               </button>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 Step {index + 1} of {total - 1}
               </div>
               <button
                 onClick={onNext}
                 disabled={nextDisabled}
-                className={`px-6 py-3 rounded-lg text-sm font-semibold ${nextDisabled
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  : "bg-black text-white hover:bg-gray-900"
+                className={`px-6 py-3 rounded-lg text-sm font-semibold transition-colors ${nextDisabled
+                  ? "bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  : "bg-[#fd4148] text-white hover:bg-[#f13c46] dark:bg-[#fd4148] dark:hover:bg-[#f13c46]"
                   }`}
               >
                 Next

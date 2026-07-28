@@ -3,7 +3,7 @@
 const CATEGORY_MAP = {
   cleanliness: { label: "Cleanliness", icon: "fa-spray-can-sparkles" },
   accuracy: { label: "Accuracy", icon: "fa-circle-check" },
-  checkIn: { label: "Check-in", icon: "fa-key" }, 
+  checkIn: { label: "Check-in", icon: "fa-key" },
   communication: { label: "Communication", icon: "fa-comment" },
   location: { label: "Location", icon: "fa-map" },
   value: { label: "Value", icon: "fa-tag" },
@@ -12,7 +12,13 @@ const CATEGORY_MAP = {
 const LAUREL_STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap');
 
+/* ----- Light mode defaults (also used as fallback) ----- */
 .rs-rating-wrapper {
+  --leaf-stop-1: #6a6a6a;
+  --leaf-stop-2: #333333;
+  --leaf-stop-3: #1f1f1f;
+  --leaf-stop-4: #0a0a0a;
+
   display: flex;
   align-items: center;
   gap: 18px;
@@ -22,6 +28,15 @@ const LAUREL_STYLES = `
   font-family: 'Montserrat', sans-serif;
   min-height: 140px;
 }
+
+/* ----- Dark mode overrides (platinum silver leaves) ----- */
+.dark .rs-rating-wrapper {
+  --leaf-stop-1: #ffffff;
+  --leaf-stop-2: #d4d4d8;
+  --leaf-stop-3: #a1a1aa;
+  --leaf-stop-4: #71717a;
+}
+
 .rs-number-container {
   position: relative;
   display: flex;
@@ -31,6 +46,7 @@ const LAUREL_STYLES = `
   height: 140px;
   transform-style: preserve-3d;
 }
+
 .rs-rating-number {
   font-size: 6.8rem;
   color: #2c2c2c;
@@ -50,13 +66,24 @@ const LAUREL_STYLES = `
   transform: rotateX(0deg) translateZ(0);
   animation: rs-flipIn3D 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
+
+/* Airbnb‑style dark mode rating number */
+.dark .rs-rating-number {
+  color: #fafafa;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.08),
+    0 8px 18px rgba(0,0,0,0.45);
+}
+
 @keyframes rs-flipIn3D {
   0% { opacity: 0; transform: rotateX(80deg) translateZ(-100px) scale(0.8); }
   100% { opacity: 1; transform: rotateX(0deg) translateZ(0) scale(1); }
 }
+
 .rs-celebrate {
   animation: rs-wobble3D 0.8s ease-in-out forwards !important;
 }
+
 @keyframes rs-wobble3D {
   0% { opacity: 1; transform: rotateX(0deg) rotateY(0deg) scale(1); }
   25% { opacity: 1; transform: rotateX(15deg) rotateY(-10deg) scale(1.08); }
@@ -64,16 +91,19 @@ const LAUREL_STYLES = `
   75% { opacity: 1; transform: rotateX(5deg) rotateY(-5deg) scale(1.02); }
   100% { opacity: 1; transform: rotateX(0deg) rotateY(0deg) scale(1); }
 }
+
 .rs-laurel-svg {
   overflow: visible;
   filter: drop-shadow(0px 8px 12px rgba(0,0,0,0.2));
 }
+
 .rs-stem {
   stroke-dasharray: 250;
   stroke-dashoffset: 250;
   animation: rs-drawStem 1s ease-out forwards;
 }
 @keyframes rs-drawStem { to { stroke-dashoffset: 0; } }
+
 .rs-leaf-group {
   opacity: 0;
   transform: perspective(400px) rotateY(-90deg) rotateX(-30deg) scale(0);
@@ -88,6 +118,7 @@ const LAUREL_STYLES = `
 .rs-leaf-3 { animation-delay: 0.5s; }
 .rs-leaf-4 { animation-delay: 0.7s; }
 .rs-leaf-5 { animation-delay: 0.9s; }
+
 .rs-floating-emoji {
   position: absolute;
   font-size: 2.2rem;
@@ -96,6 +127,14 @@ const LAUREL_STYLES = `
   animation: rs-floatUpAndOut 1.2s ease-out forwards;
   filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.2));
 }
+
+/* Dark mode emoji glow (softer) */
+.dark .rs-floating-emoji {
+  filter:
+    drop-shadow(0 0 10px rgba(255,255,255,0.12))
+    drop-shadow(0 6px 14px rgba(0,0,0,0.45));
+}
+
 @keyframes rs-floatUpAndOut {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(0deg); }
   20% { opacity: 1; transform: translate(var(--dx), var(--dy-start)) scale(1.2) rotate(var(--rot)); }
@@ -106,21 +145,38 @@ const LAUREL_STYLES = `
 function Laurel({ mirror = false }) {
   const inner = (
     <>
-      <path d="M 80,180 C 10,140 10,60 60,10" fill="none" stroke="url(#rs-leafGrad)" strokeWidth="4" className="rs-stem" strokeLinecap="round" />
+      <path
+        d="M 80,180 C 10,140 10,60 60,10"
+        fill="none"
+        stroke="url(#rs-leafGrad)"
+        strokeWidth="4"
+        className="rs-stem"
+        strokeLinecap="round"
+      />
       <g transform="translate(60, 160) rotate(-40) scale(1)">
-        <g className="rs-leaf-group rs-leaf-1"><path fill="url(#rs-leafGrad)" filter="url(#rs-inner-glow)" d="M0,0 C-20,-10 -30,-30 0,-50 C20,-30 10,-10 0,0 Z" /></g>
+        <g className="rs-leaf-group rs-leaf-1">
+          <path fill="url(#rs-leafGrad)" filter="url(#rs-inner-glow)" d="M0,0 C-20,-10 -30,-30 0,-50 C20,-30 10,-10 0,0 Z" />
+        </g>
       </g>
       <g transform="translate(40, 130) rotate(-20) scale(1.1)">
-        <g className="rs-leaf-group rs-leaf-2"><path fill="url(#rs-leafGrad)" filter="url(#rs-inner-glow)" d="M0,0 C-20,-10 -30,-30 0,-50 C20,-30 10,-10 0,0 Z" /></g>
+        <g className="rs-leaf-group rs-leaf-2">
+          <path fill="url(#rs-leafGrad)" filter="url(#rs-inner-glow)" d="M0,0 C-20,-10 -30,-30 0,-50 C20,-30 10,-10 0,0 Z" />
+        </g>
       </g>
       <g transform="translate(25, 95) rotate(5) scale(1.2)">
-        <g className="rs-leaf-group rs-leaf-3"><path fill="url(#rs-leafGrad)" filter="url(#rs-inner-glow)" d="M0,0 C-20,-10 -30,-30 0,-50 C20,-30 10,-10 0,0 Z" /></g>
+        <g className="rs-leaf-group rs-leaf-3">
+          <path fill="url(#rs-leafGrad)" filter="url(#rs-inner-glow)" d="M0,0 C-20,-10 -30,-30 0,-50 C20,-30 10,-10 0,0 Z" />
+        </g>
       </g>
       <g transform="translate(25, 55) rotate(35) scale(1.1)">
-        <g className="rs-leaf-group rs-leaf-4"><path fill="url(#rs-leafGrad)" filter="url(#rs-inner-glow)" d="M0,0 C-20,-10 -30,-30 0,-50 C20,-30 10,-10 0,0 Z" /></g>
+        <g className="rs-leaf-group rs-leaf-4">
+          <path fill="url(#rs-leafGrad)" filter="url(#rs-inner-glow)" d="M0,0 C-20,-10 -30,-30 0,-50 C20,-30 10,-10 0,0 Z" />
+        </g>
       </g>
       <g transform="translate(45, 20) rotate(65) scale(0.9)">
-        <g className="rs-leaf-group rs-leaf-5"><path fill="url(#rs-leafGrad)" filter="url(#rs-inner-glow)" d="M0,0 C-20,-10 -30,-30 0,-50 C20,-30 10,-10 0,0 Z" /></g>
+        <g className="rs-leaf-group rs-leaf-5">
+          <path fill="url(#rs-leafGrad)" filter="url(#rs-inner-glow)" d="M0,0 C-20,-10 -30,-30 0,-50 C20,-30 10,-10 0,0 Z" />
+        </g>
       </g>
     </>
   );
@@ -128,11 +184,12 @@ function Laurel({ mirror = false }) {
   return (
     <svg className="rs-laurel-svg" width="78" height="156" viewBox="0 0 100 200">
       <defs>
+        {/* Use CSS variables for the gradient stops – this enables dark mode switching */}
         <linearGradient id="rs-leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#6a6a6a" />
-          <stop offset="40%" stopColor="#333333" />
-          <stop offset="80%" stopColor="#1f1f1f" />
-          <stop offset="100%" stopColor="#0a0a0a" />
+          <stop offset="0%" stopColor="var(--leaf-stop-1)" />
+          <stop offset="40%" stopColor="var(--leaf-stop-2)" />
+          <stop offset="80%" stopColor="var(--leaf-stop-3)" />
+          <stop offset="100%" stopColor="var(--leaf-stop-4)" />
         </linearGradient>
         <filter id="rs-inner-glow">
           <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur" />
@@ -154,7 +211,6 @@ function AnimatedRating({ targetRating }) {
   const [display, setDisplay] = useState("0.0");
 
   useEffect(() => {
-    // If no ratings, just display dash
     if (!targetRating) {
       setDisplay("—");
       return;
@@ -251,15 +307,12 @@ export default function RatingSummary({ reviewIds = [] }) {
     const allReviews = JSON.parse(localStorage.getItem("reviews")) || [];
     const listingReviews = allReviews.filter(r => reviewIds.includes(r.id));
     setReviews(listingReviews);
-
     if (listingReviews.length === 0) return;
 
-    // Compute overall average dynamically
     const totalRating = listingReviews.reduce((sum, r) => sum + (r.rating || 0), 0);
     const avg = listingReviews.length ? totalRating / listingReviews.length : 0;
     setOverallRating(Math.round(avg * 10) / 10);
 
-    // Compute category averages dynamically
     const catSums = {};
     const catCounts = {};
     listingReviews.forEach(r => {
@@ -278,7 +331,6 @@ export default function RatingSummary({ reviewIds = [] }) {
     });
     setCategoryAverages(catAvgs);
 
-    // Distribution dynamically mapped for progress bars
     const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     listingReviews.forEach(r => {
       const rating = Math.round(r.rating || 0);
@@ -300,46 +352,50 @@ export default function RatingSummary({ reviewIds = [] }) {
   }));
 
   return (
-    <section className="border-b border-gray-200 py-8">
+    <section className="border-b border-gray-200 dark:border-zinc-800 py-8">
       <style>{LAUREL_STYLES}</style>
-      
-      {/* Visual Animation Container */}
-      <div className="mb-6 flex flex-col items-center">
-        <AnimatedRating targetRating={overallRating} />
-        <p className="mt-3 text-lg font-semibold text-gray-900">
-          {reviews.length > 0 ? "Guest favourite" : "No reviews yet"}
-        </p>
-        <p className="mt-1 max-w-sm text-center text-sm text-gray-600">
-          {reviews.length > 0
-            ? `Based on ${reviews.length} review${reviews.length > 1 ? "s" : ""}`
-            : "Be the first to leave a review"}
-        </p>
-        <button className="mt-2 text-xs text-gray-700 underline">How reviews work</button>
-      </div>
 
-      {/* Dynamic Grid: Progress Bars & Categories */}
-      <div className="grid grid-cols-7 gap-4 border-t border-gray-200 pt-6 text-sm">
-        <div>
-          <div className="mb-2 text-xs font-semibold text-gray-900">Overall rating</div>
-          {bars.map((b) => (
-            <div key={b.star} className="flex items-center gap-2">
-              <span className="w-3 text-xs text-gray-700">{b.star}</span>
-              <div className="h-1 flex-1 rounded-full bg-gray-200">
-                <div
-                  className="h-full rounded-full bg-gray-900"
-                  style={{ width: `${b.percent}%` }}
-                />
+      {/* Rating Animation – wrapped in a premium glass card */}
+      <div className="mx-auto max-w-2xl rounded-3xl bg-white dark:bg-zinc-900/80 backdrop-blur-xl border border-gray-200 dark:border-zinc-800 shadow-xl p-6">
+        <div className="mb-4 flex flex-col items-center">
+          <AnimatedRating targetRating={overallRating} />
+          <p className="mt-3 text-lg font-semibold text-gray-900 dark:text-zinc-100">
+            {reviews.length > 0 ? "Guest favourite" : "No reviews yet"}
+          </p>
+          <p className="mt-1 max-w-sm text-center text-sm text-gray-600 dark:text-zinc-400">
+            {reviews.length > 0
+              ? `Based on ${reviews.length} review${reviews.length > 1 ? "s" : ""}`
+              : "Be the first to leave a review"}
+          </p>
+          <button className="mt-2 text-xs text-gray-700 dark:text-zinc-400 underline underline-offset-4 transition hover:text-gray-900 dark:hover:text-white">
+            How reviews work
+          </button>
+        </div>
+
+        {/* Progress Bars & Categories */}
+        <div className="grid grid-cols-7 gap-4 border-t border-gray-200 dark:border-zinc-800 pt-6 text-sm">
+          <div>
+            <div className="mb-2 text-xs font-semibold text-gray-900 dark:text-zinc-100">Overall rating</div>
+            {bars.map((b) => (
+              <div key={b.star} className="flex items-center gap-2">
+                <span className="w-3 text-xs text-gray-700 dark:text-zinc-400">{b.star}</span>
+                <div className="h-1 flex-1 rounded-full bg-gray-200 dark:bg-zinc-700">
+                  <div
+                    className="h-full rounded-full bg-gray-900 dark:bg-zinc-100"
+                    style={{ width: `${b.percent}%` }}
+                  />
+                </div>
               </div>
+            ))}
+          </div>
+          {categories.map((c) => (
+            <div key={c.label} className="border-l border-gray-200 dark:border-zinc-800 pl-4">
+              <div className="text-xs font-semibold text-gray-900 dark:text-zinc-100">{c.label}</div>
+              <div className="mt-1 text-lg font-semibold text-gray-900 dark:text-zinc-100">{c.value}</div>
+              <i className={`fa-solid ${c.icon} mt-2 text-xl text-gray-800 dark:text-zinc-300`} />
             </div>
           ))}
         </div>
-        {categories.map((c) => (
-          <div key={c.label} className="border-l border-gray-200 pl-4">
-            <div className="text-xs font-semibold text-gray-900">{c.label}</div>
-            <div className="mt-1 text-lg font-semibold text-gray-900">{c.value}</div>
-            <i className={`fa-solid ${c.icon} mt-2 text-xl text-gray-800`} />
-          </div>
-        ))}
       </div>
     </section>
   );

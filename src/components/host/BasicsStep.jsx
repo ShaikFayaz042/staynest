@@ -11,28 +11,28 @@ function Counter({ label, value = 0, onChange, min = 0, max = 20 }) {
   };
 
   return (
-    <div className="flex items-center justify-between py-6 border-b border-gray-200">
-      <div className="text-lg font-medium">{label}</div>
+    <div className="flex items-center justify-between py-6 border-b border-gray-200 dark:border-gray-800">
+      <div className="text-lg font-medium text-gray-900 dark:text-gray-100">{label}</div>
       <div className="flex items-center gap-4">
         <button
           onClick={handleDecrement}
           disabled={value <= min}
           className={`w-8 h-8 rounded-full border ${
             value <= min
-              ? "border-gray-300 text-gray-300 cursor-not-allowed"
-              : "border-gray-400 text-gray-600 hover:border-black"
+              ? "border-gray-300 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed"
+              : "border-gray-400 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#FF385C] dark:hover:border-[#FF385C]"
           } flex items-center justify-center`}
         >
           −
         </button>
-        <span className="w-6 text-center text-lg font-semibold">{value}</span>
+        <span className="w-6 text-center text-lg font-semibold text-gray-900 dark:text-white">{value}</span>
         <button
           onClick={handleIncrement}
           disabled={value >= max}
           className={`w-8 h-8 rounded-full border ${
             value >= max
-              ? "border-gray-300 text-gray-300 cursor-not-allowed"
-              : "border-gray-400 text-gray-600 hover:border-black"
+              ? "border-gray-300 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed"
+              : "border-gray-400 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#FF385C] dark:hover:border-[#FF385C]"
           } flex items-center justify-center`}
         >
           +
@@ -57,10 +57,10 @@ export default function BasicsStep() {
   return (
     <HostFrame progress={[0.7, 0, 0]} nextDisabled={false}>
       <div className="max-w-2xl mx-auto px-8 md:px-16 py-12">
-        <h1 className="text-4xl font-extrabold text-gray-900">
+        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">
           Share some basics about your place
         </h1>
-        <p className="mt-3 text-gray-600">
+        <p className="mt-3 text-gray-600 dark:text-gray-300">
           You'll add more details later, like bed types.
         </p>
         <div className="mt-8">

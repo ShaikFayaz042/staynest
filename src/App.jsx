@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -40,19 +41,21 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/host" element={<HostPage />} />
-        <Route path="/host/create" element={<HostWizard />} />
-        <Route path="/listing/:id" element={<ListingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/profile" element={<ProfileSetupPage />} />
-        <Route path="/trips" element={<MyTripsPage />} />
-        <Route path="/wishlists" element={<WishlistsPage />} />
-      </Routes>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/host" element={<HostPage />} />
+          <Route path="/host/create" element={<HostWizard />} />
+          <Route path="/listing/:id" element={<ListingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/profile" element={<ProfileSetupPage />} />
+          <Route path="/trips" element={<MyTripsPage />} />
+          <Route path="/wishlists" element={<WishlistsPage />} />
+        </Routes>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

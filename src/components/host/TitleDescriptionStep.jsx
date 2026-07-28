@@ -22,39 +22,39 @@ export default function TitleDescriptionStep() {
     <HostFrame progress={[1, 0.75, 0]} nextDisabled={!isValid}>
       <div className="max-w-3xl mx-auto px-8 md:px-16 py-8 space-y-10">
         <section>
-          <h1 className="text-3xl font-extrabold text-gray-900">
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
             Now, let's give your house a title
           </h1>
-          <p className="mt-2 text-gray-600 text-sm">
+          <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm">
             Short titles work best. Have fun with it — you can always change it later.
           </p>
           <textarea
             value={title}
             onChange={handleTitleChange}
-            className="mt-4 w-full h-28 border-2 border-black rounded-xl p-4 text-base outline-none resize-none focus:border-gray-600"
+            className="mt-4 w-full h-28 border-2 border-gray-300 dark:border-gray-700 rounded-xl p-4 text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none resize-none focus:border-[#FF385C]"
             maxLength={50}
             placeholder="e.g. Cozy Beachfront Villa"
           />
-          <div className="mt-1 text-sm text-gray-500 text-right">
+          <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 text-right">
             {title.length}/50
           </div>
         </section>
 
         <section>
-          <h2 className="text-3xl font-extrabold text-gray-900">
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
             Create your description
           </h2>
-          <p className="mt-2 text-gray-600 text-sm">
+          <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm">
             Share what makes your place special.
           </p>
           <textarea
             value={description}
             onChange={handleDescriptionChange}
-            className="mt-4 w-full h-40 border-2 border-black rounded-xl p-4 text-base outline-none resize-none focus:border-gray-600"
+            className="mt-4 w-full h-40 border-2 border-gray-300 dark:border-gray-700 rounded-xl p-4 text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none resize-none focus:border-[#FF385C]"
             maxLength={500}
             placeholder="Describe your space, neighbourhood, and what guests can expect..."
           />
-          <div className="mt-1 text-sm text-gray-500 text-right">
+          <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 text-right">
             {description.length}/500
           </div>
         </section>

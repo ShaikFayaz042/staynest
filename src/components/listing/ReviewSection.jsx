@@ -14,8 +14,8 @@ export default function ReviewSection({ reviewIds = [] }) {
 
   if (reviews.length === 0) {
     return (
-      <section className="border-b border-gray-200 py-8">
-        <p className="text-gray-500">No reviews yet.</p>
+      <section className="border-b border-gray-200 dark:border-gray-700 py-8">
+        <p className="text-gray-500 dark:text-gray-400">No reviews yet.</p>
       </section>
     );
   }
@@ -24,7 +24,7 @@ export default function ReviewSection({ reviewIds = [] }) {
   const hasMore = reviews.length > 4;
 
   return (
-    <section className="border-b border-gray-200 py-8">
+    <section className="border-b border-gray-200 dark:border-gray-700 py-8">
       <div className="grid grid-cols-2 gap-x-12 gap-y-8">
         {displayedReviews.map((r) => (
           <ReviewCard key={r.id} review={r} />
@@ -35,7 +35,7 @@ export default function ReviewSection({ reviewIds = [] }) {
         <div className="mt-8 flex justify-center">
           <button
             onClick={() => setShowAll(!showAll)}
-            className="rounded-lg border border-gray-900 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 transition"
+            className="rounded-lg border border-gray-900 dark:border-gray-300 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
             {showAll ? "Show less" : `Show all ${reviews.length} reviews`}
           </button>

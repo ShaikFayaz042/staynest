@@ -44,17 +44,17 @@ export default function PropertyTypeStep() {
   return (
     <HostFrame progress={[0.3, 0, 0]} nextDisabled={!isValid}>
       <div className="max-w-5xl mx-auto px-8 md:px-16 py-12">
-        <h1 className="text-4xl font-extrabold text-gray-900">
+        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">
           Which of these best describes your place?
         </h1>
-        <p className="mt-3 text-gray-600">
+        <p className="mt-3 text-gray-600 dark:text-gray-300">
           Select the category that best matches your property.
         </p>
 
-        <div className="mt-6 text-sm text-gray-500">
+        <div className="mt-6 text-sm text-gray-500 dark:text-gray-400">
           {selected ? (
             <span>
-              Selected: <span className="font-semibold text-gray-900">{selected}</span>
+              Selected: <span className="font-semibold text-gray-900 dark:text-white">{selected}</span>
             </span>
           ) : (
             <span>Please select a category to continue</span>
@@ -70,14 +70,14 @@ export default function PropertyTypeStep() {
                 onClick={() => handleSelect(cat.name)}
                 className={`relative text-left p-5 rounded-xl border transition-all ${
                   isSelected
-                    ? "border-black border-2 bg-gray-50 shadow-md"
-                    : "border-gray-200 hover:border-gray-400"
+                    ? "border-[#FF385C] border-2 bg-rose-50 dark:bg-gray-800 shadow-md"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-900"
                 }`}
               >
-                <i className={`fa-solid ${cat.icon} text-2xl text-gray-800`} />
-                <div className="mt-6 font-semibold">{cat.name}</div>
+                <i className={`fa-solid ${cat.icon} text-2xl text-gray-800 dark:text-gray-200`} />
+                <div className="mt-6 font-semibold text-gray-900 dark:text-white">{cat.name}</div>
                 {isSelected && (
-                  <span className="absolute top-3 right-3 text-green-600">
+                  <span className="absolute top-3 right-3 text-[#FF385C]">
                     <i className="fa-solid fa-check" />
                   </span>
                 )}
