@@ -94,8 +94,9 @@ function GuestRow({ label, sub, value, onChange }) {
   );
 }
 
-export default function SearchBar() {
+export default function SearchBar({ onMobileActiveChange }) {
   const [active, setActive] = useState(null); // 'where' | 'when' | 'who' | null
+  const [mobileActive, setMobileActive] = useState(false);
   const [where, setWhere] = useState('');
   const [checkIn, setCheckIn] = useState(null);
   const [checkOut, setCheckOut] = useState(null);
@@ -108,17 +109,39 @@ export default function SearchBar() {
   const whereRef = useRef(null);
   const whenRef = useRef(null);
   const whoRef = useRef(null);
+  const whereInputRef = useRef(null);
   const [pill, setPill] = useState({ left: 0, width: 0, opacity: 0 });
   const navigate = useNavigate();
   const location = useLocation();
 
+  const closeSearch = () => {
+    setActive(null);
+    if (mobileActive) {
+      setMobileActive(false);
+      onMobileActiveChange?.(false);
+    }
+  };
+
   useEffect(() => {
     const onClick = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setActive(null);
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) closeSearch();
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
-  }, []);
+  }, [mobileActive, onMobileActiveChange]);
+  useEffect(() => {
+    if (mobileActive) {
+      // focus the where input when mobile search opens
+      setTimeout(() => whereInputRef.current && whereInputRef.current.focus(), 50);
+    }
+  }, [mobileActive]);
+
+  useEffect(() => {
+    if (!active && mobileActive) {
+      setMobileActive(false);
+      onMobileActiveChange?.(false);
+    }
+  }, [active, mobileActive, onMobileActiveChange]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -175,7 +198,13 @@ export default function SearchBar() {
 
     const searchPath = params.toString() ? `/?${params.toString()}` : '/';
     navigate(searchPath);
-    setActive(null);
+    closeSearch();
+  };
+
+  const openMobileSearch = () => {
+    setMobileActive(true);
+    setActive('where');
+    onMobileActiveChange?.(true);
   };
 
   const dateLabel = checkIn && checkOut
@@ -187,7 +216,7 @@ export default function SearchBar() {
     : null;
 
   const sectionCls = (key) =>
-    `relative z-10 flex-1 text-left rounded-full min-w-0 px-4 lg:px-5 py-1.5 transition-colors ${
+    `relative z-10 flex-1 text-left rounded-full min-w-0 px-3 sm:px-4 lg:px-5 py-1.5 transition-colors ${
       active === key ? '' : 'hover:bg-gray-100 dark:hover:bg-gray-800'
     }`;
 
@@ -223,13 +252,57 @@ export default function SearchBar() {
     }
   };
 
-  return (
-    <div
-      ref={wrapRef}
-      className={`hidden md:flex flex-1 max-w-lg lg:max-w-xl mx-auto h-12 items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-shadow duration-200 relative px-1 pt-2 pb-1 ${
-        active ? 'bg-gray-100 dark:bg-gray-700 shadow-md' : 'shadow-sm hover:shadow-md'
-      }`}
-    >
+  return(
+    <>
+      <div className="flex items-center justify-center w-full md:hidden">
+        {!mobileActive && (
+          <div className="w-full max-w-[180px]">
+            <div className="relative">
+              <input
+                ref={whereInputRef}
+                type="text"
+                value={where}
+                onChange={(e) => setWhere(e.target.value)}
+                onFocus={openMobileSearch}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSearch();
+                  if (e.key === 'Escape') closeSearch();
+                }}
+                placeholder="Search destinations"
+                aria-label="Open search"
+                className="w-full h-11 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm px-4 pr-10 text-sm text-gray-900 dark:text-gray-100 focus:outline-none"
+              />
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (where.trim()) {
+                    handleSearch();
+                  } else {
+                    openMobileSearch();
+                  }
+                }}
+                aria-label="Search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-800 dark:text-gray-100 p-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div
+        ref={wrapRef}
+        className={
+          mobileActive
+            ? 'fixed top-3 left-1/2 -translate-x-1/2 z-50 flex w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] h-12 items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-shadow duration-200 px-2 pt-2 pb-1'
+            : 'hidden md:flex flex-1 w-full max-w-full md:max-w-lg lg:max-w-xl mx-auto h-12 items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-shadow duration-200 relative px-2 pt-2 pb-1'
+        + (active ? ' bg-gray-100 dark:bg-gray-700 shadow-md' : ' shadow-sm hover:shadow-md')
+        }
+      >
       {/* Sliding pill */}
       <div
         className="absolute top-1 bottom-1 bg-white dark:bg-gray-600 rounded-full shadow-md pointer-events-none transition-all duration-300 ease-out"
@@ -244,6 +317,7 @@ export default function SearchBar() {
       <div ref={whereRef} className={sectionCls('where')} onClick={() => setActive('where')}>
         <div className="text-xs font-bold text-gray-900 dark:text-white">Where</div>
         <input
+          ref={whereInputRef}
           type="text"
           value={where}
           onChange={(e) => setWhere(e.target.value)}
@@ -291,7 +365,7 @@ export default function SearchBar() {
 
       {/* Where Popover */}
       {active === 'where' && (
-        <div className="absolute left-0 top-full mt-3 w-[420px] max-w-[95vw] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 z-50">
+        <div className="absolute left-0 top-full mt-3 w-full sm:w-[420px] max-w-[95vw] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-4 sm:p-6 z-50">
               <div className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Suggested destinations</div>
           <div className="max-h-72 overflow-y-auto">
             {filteredDestinations.length > 0 ? filteredDestinations.map((d) => (
@@ -317,7 +391,7 @@ export default function SearchBar() {
 
       {/* When Popover */}
       {active === 'when' && (
-        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-[720px] max-w-[95vw] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 z-50">
+        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-full sm:w-[720px] max-w-[95vw] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-4 sm:p-6 z-50">
           <div className="flex items-center justify-between mb-4">
             <button onClick={prevMonth} className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300">
               <i className="fa-solid fa-chevron-left text-xs"></i>
@@ -364,13 +438,14 @@ export default function SearchBar() {
 
       {/* Who Popover */}
       {active === 'who' && (
-        <div className="absolute right-0 top-full mt-3 w-[400px] max-w-[95vw] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 z-50">
+        <div className="absolute right-0 top-full mt-3 w-full sm:w-[400px] max-w-[95vw] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-4 sm:p-6 z-50">
           <GuestRow label="Adults" sub="Ages 13 or above" value={guests.adults} onChange={(v) => setGuests({ ...guests, adults: v })} />
-          <GuestRow label="Children" sub="Ages 2 – 12" value={guests.children} onChange={(v) => setGuests({ ...guests, children: v })} />
+          <GuestRow label="Children" sub="Ages 2 - 12" value={guests.children} onChange={(v) => setGuests({ ...guests, children: v })} />
           <GuestRow label="Infants" sub="Under 2" value={guests.infants} onChange={(v) => setGuests({ ...guests, infants: v })} />
           <GuestRow label="Pets" sub="Bringing a service animal?" value={guests.pets} onChange={(v) => setGuests({ ...guests, pets: v })} />
         </div>
       )}
     </div>
+    </>
   );
 }

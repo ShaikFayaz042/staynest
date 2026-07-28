@@ -43,7 +43,7 @@ export default function ListingGrid() {
   }, {});
 
   return (
-    <div className="mx-auto w-full max-w-[1680px] px-6 py-6 md:px-10">
+    <div className="mx-auto w-full max-w-[1680px] px-4 sm:px-6 py-6 md:px-10">
       <div className="flex flex-col gap-10">
         {Object.entries(groupedListings).map(([city, listings]) => (
           <ScrollRow

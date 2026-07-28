@@ -116,7 +116,7 @@ export default function BookingCard({ list }) {
   };
 
   return (
-    <aside className="sticky top-24 space-y-4">
+    <aside className="space-y-4 md:sticky md:top-24">
       <div className="flex items-center justify-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-sm">
         <span className="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-pink-500 text-white">
           <i className="fa-solid fa-tag text-[10px]" />

@@ -9,22 +9,12 @@ export default function Navbar({
   type = "hosting",
   variant = "default", // 'default' | 'host-dashboard' | 'profile' | 'auth'
 }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileSearchActive, setMobileSearchActive] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -50,6 +40,10 @@ export default function Navbar({
     setIsProfileMenuOpen(false);
   };
 
+  const handleProfileToggle = () => {
+    setIsProfileMenuOpen((prev) => !prev);
+  };
+
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : null;
 
   // Check if user has any listings
@@ -63,6 +57,7 @@ export default function Navbar({
 
   // Determine home path based on current route
   const homePath = path.startsWith("/host") ? "/host" : "/";
+  const switchLabel = variant === "default" && !user ? "Switch to hosting" : `Switch to ${type}`;
 
   // Host dashboard tabs
   const hostTabs = [
@@ -83,18 +78,20 @@ export default function Navbar({
       <nav className="w-full h-16 md:h-20 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 md:px-8 bg-white dark:bg-gray-900 sticky top-0 z-50">
         {/* 1. Logo Section */}
         <div
-          className="flex items-center gap-2 cursor-pointer shrink-0"
+          className={`flex items-center gap-2 cursor-pointer shrink-0 ${mobileSearchActive ? 'hidden' : 'flex'}`}
           onClick={() => navigate("/")}
         >
-          <StayNestLogo width={40} height={45} />
-          <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <StayNestLogo width={30} height={34} />
+          <span className="text-base md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Stay<span className="text-[#FF385C]">Nest</span>
           </span>
         </div>
 
         {/* 2. Center Section (Search Bar or Tabs based on variant) */}
-        <div className="flex-1 flex justify-center hidden md:flex">
-          {variant === "default" && <SearchBar />}
+        <div className="flex-1 flex justify-center">
+          {variant === "default" && (
+            <SearchBar onMobileActiveChange={setMobileSearchActive} />
+          )}
 
           {variant === "host-dashboard" && (
             <div className="flex items-center gap-6">
@@ -147,24 +144,32 @@ export default function Navbar({
         </div>
 
         {/* 3. Right Side Options */}
-        <div className="hidden md:flex items-center gap-3 shrink-0">
-          {/* Dark Mode Toggle */}
-          <ThemeToggle />
+        <div className={`items-center gap-3 shrink-0 ${mobileSearchActive ? 'hidden' : 'flex'}`}>
+          {/* Dark Mode Toggle (desktop only) */}
+          <div className="hidden md:block">
+            <ThemeToggle />
+          </div>
 
-          {/* Switch button - only for default & host-dashboard */}
-          {(variant === "default" || variant === "host-dashboard") && (
+          {/* Wide-screen actions for logged-in users only */}
+          {user && (variant === "default" || variant === "host-dashboard") && (
             <button
               onClick={handleSwitch}
               className="text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-full transition-colors hidden lg:block"
             >
-              {variant === "default" && !user ? "Nest Your Home" : ` Switch to ${type}`}
+              {switchLabel}
             </button>
+          )}
+
+          {!user && (variant === "default" || variant === "host-dashboard") && (
+            <span className="hidden lg:block text-sm font-medium text-gray-800 dark:text-gray-200 px-3 py-2">
+              Nest Your Home
+            </span>
           )}
 
           {/* Profile circle - show only if logged in and not in auth variant */}
           {user && variant !== "auth" && (
             <button
-              onClick={() => navigate("/profile")}
+              onClick={handleProfileToggle}
               className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-100 font-semibold flex items-center justify-center hover:ring-2 hover:ring-rose-200 dark:hover:ring-rose-500/50 transition overflow-hidden"
             >
               {user.profilePhoto ? (
@@ -180,40 +185,53 @@ export default function Navbar({
           )}
 
           {/* Hamburger with dropdown - show only if not in auth variant */}
-          {variant !== "auth" && (
-            <div className="relative" ref={profileMenuRef}>
+          <div className="relative" ref={profileMenuRef}>
+            {/* Show a hamburger-style circle button when no user is logged in */}
+            {!user && variant !== 'auth' && (
               <button
-                onClick={() => setIsProfileMenuOpen((v) => !v)}
-                className="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-shadow flex items-center justify-center"
+                onClick={handleProfileToggle}
+                aria-label="Open menu"
+                className="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-4 h-4 text-gray-700 dark:text-gray-300"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 18h16.5" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-800 dark:text-gray-200">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
                 </svg>
               </button>
+            )}
 
-              {isProfileMenuOpen && (
-                <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 py-2 z-50 overflow-hidden">
+            {isProfileMenuOpen && (
+              <div className="absolute right-0 mt-3 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 py-3 z-50 overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                  <span className="block text-sm font-semibold text-gray-900 dark:text-white">Account</span>
+                  <span className="block text-xs text-gray-500 dark:text-gray-400">Manage your settings</span>
+                </div>
+                <div className="h-px bg-gray-100 dark:bg-gray-700 my-2 hidden md:block" />
+                {user && (variant === "default" || variant === "host-dashboard" || variant === "profile") && (
+                  <>
+                    {(["/trips", "/wishlists", "/profile", "/listing"].includes(path) || path.startsWith("/listing/")) && (
+                      <ProfileMenuItem
+                        icon="home"
+                        label="Home"
+                        onClick={() => { navigate("/"); setIsProfileMenuOpen(false); }}
+                      />
+                    )}
+                    <ProfileMenuItem
+                      icon="airbnb"
+                      label={switchLabel}
+                      onClick={() => { handleSwitch(); setIsProfileMenuOpen(false); }}
+                    />
+                    {!hasListings && (
+                      <ProfileMenuItem
+                        icon="home"
+                        label="Become a Host"
+                        onClick={() => { navigate("/host/create"); setIsProfileMenuOpen(false); }}
+                      />
+                    )}
+                    <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
+                  </>
+                )}
                   {user ? (
                     <>
-                      {/* Home - visible only when NOT on / or /host */}
-                      {path !== "/" && path !== "/host" && (
-                        <>
-                          <ProfileMenuItem
-                            icon="home"
-                            label="Home"
-                            onClick={() => { navigate(homePath); setIsProfileMenuOpen(false); }}
-                          />
-                          <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
-                        </>
-                      )}
-
                       <ProfileMenuItem
                         icon="heart"
                         label="Wishlists"
@@ -230,7 +248,6 @@ export default function Navbar({
                         onClick={() => { navigate("/profile"); setIsProfileMenuOpen(false); }}
                       />
 
-                      {/* "Become a Host" - only if user has no listings */}
                       {!hasListings && (
                         <>
                           <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
@@ -266,89 +283,14 @@ export default function Navbar({
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* 4. Mobile Menu Button (Only visible on small screens and not in auth variant) */}
-        {variant !== "auth" && (
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="block md:hidden p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative z-50"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6 text-gray-800 dark:text-gray-200"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 18h16.5" />
-            </svg>
-          </button>
-        )}
+          {/* 4. Mobile Menu Button removed for new navbar design */}
+        
       </nav>
 
-      {/* 5. Mobile Menu Dropdown (Mobile & Tablet < md) */}
-      <div
-        className={`md:hidden fixed top-16 left-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-lg transition-all duration-300 ease-in-out overflow-hidden z-40 ${
-          isMobileMenuOpen ? "max-h-125 opacity-100 visible" : "max-h-0 opacity-0 invisible"
-        }`}
-      >
-        <div className="flex flex-col p-4 space-y-4">
-          <div className="flex flex-col space-y-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-100 dark:border-gray-700">
-            <button className="text-left px-3 py-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors">
-              <div className="text-xs font-bold text-gray-900 dark:text-white">Where</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Search destinations</div>
-            </button>
-            <div className="h-px w-full bg-gray-200 dark:bg-gray-700"></div>
-            <button className="text-left px-3 py-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors">
-              <div className="text-xs font-bold text-gray-900 dark:text-white">When</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Add dates</div>
-            </button>
-            <div className="h-px w-full bg-gray-200 dark:bg-gray-700"></div>
-            <div className="flex items-center justify-between px-3 py-2">
-              <div>
-                <div className="text-xs font-bold text-gray-900 dark:text-white">Who</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">Add guests</div>
-              </div>
-              <button className="bg-[#FF385C] text-white rounded-full p-2 hover:bg-[#d90b35] transition-colors shadow-md">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-            <button className="text-left font-medium text-gray-800 dark:text-gray-200 px-3 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
-              Nest Your Home
-            </button>
-            <div className="flex items-center justify-between px-3 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
-              <span className="font-medium text-gray-800 dark:text-gray-200">Dark mode</span>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 6. Mobile Overlay (Clicking outside closes menu) */}
-      {isMobileMenuOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/20 dark:bg-black/40 z-30 top-16"
-          onClick={() => setIsMobileMenuOpen(false)}
-        ></div>
+      {isProfileMenuOpen && (
+        <div className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40" onClick={() => setIsProfileMenuOpen(false)} />
       )}
     </div>
   );

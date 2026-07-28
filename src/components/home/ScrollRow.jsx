@@ -77,7 +77,7 @@ export default function ScrollRow({ title, listings }) {
         {listings.map((listing) => (
           <div
             key={listing.id}
-            className="w-[calc((100%-1.5rem)/2)] shrink-0 snap-start sm:w-[calc((100%-3rem)/3)] md:w-[calc((100%-4.5rem)/4)] lg:w-[calc((100%-6rem)/5)]"
+            className="w-[min(100%,240px)] shrink-0 snap-start sm:w-[min(100%,280px)] md:w-[calc((100%-4.5rem)/4)] lg:w-[calc((100%-6rem)/5)]"
           >
             <ListingCard listing={listing} />
           </div>

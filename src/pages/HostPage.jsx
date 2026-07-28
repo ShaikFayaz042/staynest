@@ -11,9 +11,9 @@ export default function HostPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900" style={{ fontFamily: 'Nunito, sans-serif' }}>
       <Navbar type="travelling" variant="host-dashboard" />
-      <main className="px-8 md:px-16 py-12">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Your listing</h1>
+      <main className="px-4 sm:px-6 md:px-16 py-8 sm:py-12">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">Your listing</h1>
           <div className="flex items-center gap-3">
             <Link
               to="/host/create"
@@ -35,7 +35,7 @@ export default function HostPage() {
               </p>
             </div>
 
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {userListings.length > 0 ? (
                 userListings.map(listing => (
                   <div key={listing.id} className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition bg-white dark:bg-gray-800">
