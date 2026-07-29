@@ -4,72 +4,76 @@ import { ThemeContext } from '../../context/ThemeContext';
 export default function Footer() {
   return (
     <footer className="w-full bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 mt-4 pt-16 pb-0 text-gray-600 dark:text-gray-400">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        {/* UPPER SECTION */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 border-b border-gray-200 dark:border-gray-700 pb-12">
-          {/* LEFT: Animated Logo */}
-          <div className="lg:col-span-4 flex flex-col items-start gap-2 -mt-6">
-            <FooterLogoAnimation />
-          </div>
-
-          {/* RIGHT: Link columns */}
-          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-            {/* Hosting */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-base gap-1.5 font-semibold text-lg text-[#1e272e] dark:text-gray-200">
-                <StayNestLogo width={20} height={25} theme={ThemeContext} />
-                Hosting
-              </div>
-              <ul className="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">StayNest your home</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Nest your experience</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Nest your service</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">NestCover for Hosts</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Hosting resources</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Community forum</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Hosting responsibly</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Join a free hosting class</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Find a co-host</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Refer a host</li>
-              </ul>
+      <div className="w-full border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          {/* UPPER SECTION */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 pb-12">
+            {/* LEFT: Animated Logo */}
+            <div className="lg:col-span-4 flex flex-col items-center text-center gap-2 -mt-6 -translate-x-[22px] lg:translate-x-0 lg:items-start lg:text-left">
+              <FooterLogoAnimation />
             </div>
 
-            {/* StayNest */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-base gap-1.5 font-semibold text-lg text-[#1e272e] dark:text-gray-200">
-                <StayNestLogo width={20} height={25} theme={ThemeContext} />
-                StayNest
+            {/* RIGHT: Link columns */}
+            <div className="lg:col-span-8 grid grid-cols-2 gap-6 md:grid-cols-3 md:gap-10">
+              {/* Hosting */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-base gap-1.5 font-semibold text-lg text-[#1e272e] dark:text-gray-200">
+                  <StayNestLogo width={20} height={25} theme={ThemeContext} />
+                  Hosting
+                </div>
+                <ul className="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">StayNest your home</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Nest your experience</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Nest your service</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">NestCover for Hosts</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Hosting resources</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Community forum</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Hosting responsibly</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Join a free hosting class</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Find a co-host</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Refer a host</li>
+                </ul>
               </div>
-              <ul className="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">2026 Summer Release</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Newsroom</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Careers</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Investors</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">StayNest.org emergency stays</li>
-              </ul>
-            </div>
 
-            {/* Support */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-base gap-1.5 font-semibold text-lg text-[#1e272e] dark:text-gray-200">
-                <StayNestLogo width={20} height={25} theme={ThemeContext} />
-                Support
+              {/* StayNest */}
+              <div className="order-3 col-span-2 justify-self-center flex flex-col gap-2 md:order-none md:col-span-1 md:justify-self-auto">
+                <div className="flex items-base gap-1.5 font-semibold text-lg text-[#1e272e] dark:text-gray-200 justify-center md:justify-start">
+                  <StayNestLogo width={20} height={25} theme={ThemeContext} />
+                  StayNest
+                </div>
+                <ul className="flex flex-col gap-1 text-xs md:text-sm text-gray-600 dark:text-gray-400">
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">2026 Summer Release</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Newsroom</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Careers</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Investors</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">StayNest.org emergency stays</li>
+                </ul>
               </div>
-              <ul className="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Help Centre</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Get help with a safety issue</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">NestCover</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Anti-discrimination</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Disability support</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Cancellation options</li>
-                <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Report neighbourhood concern</li>
-              </ul>
+
+              {/* Support */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-base gap-1.5 font-semibold text-lg text-[#1e272e] dark:text-gray-200">
+                  <StayNestLogo width={20} height={25} theme={ThemeContext} />
+                  Support
+                </div>
+                <ul className="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Help Centre</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Get help with a safety issue</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">NestCover</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Anti-discrimination</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Disability support</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Cancellation options</li>
+                  <li className="hover:text-[#FF385C] dark:hover:text-[#FF385C] cursor-pointer transition-colors">Report neighbourhood concern</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* BOTTOM SECTION */}
-        <div className="pt-8 flex flex-col gap-6">
+      {/* BOTTOM SECTION */}
+      <div className="w-full">
+        <div className="w-full px-6 lg:px-10 pt-8 flex flex-col gap-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-xs font-medium text-gray-500 dark:text-gray-400 flex flex-wrap justify-center gap-1 md:gap-2">
               <span>© 2026 StayNest, Inc.</span>
@@ -102,7 +106,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="w-full relative mt-4 pt-8 border-t border-gray-200 dark:border-gray-700 flex justify-center">
+          <div className="w-full relative mt-4 pt-8 border-t border-gray-200 dark:border-gray-800 flex justify-center">
             <div className="absolute -top-3 bg-white dark:bg-gray-900 px-6 text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
               Built by <span className="text-[#FF385C] font-semibold">Fayaz</span>
             </div>

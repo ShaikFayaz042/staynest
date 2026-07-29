@@ -1,8 +1,10 @@
-﻿import { useContext, useState } from "react";
+﻿import { useContext, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import darkBg from "../assets/images/DarkBG.png";
 import lightBg from "../assets/images/LightBG.png";
+import darkMobile from "../assets/images/DarkBG_mobile.png";
+import lightMobile from "../assets/images/LightBG_mobile.png";
 import Navbar from "../components/common/Navbar";
 import { ThemeContext } from "../context/ThemeContext";
 
@@ -43,7 +45,17 @@ function Field({ icon, type = "text", placeholder, value, onChange, trailing }) 
 export default function SignupPage() {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === "dark";
-  const bg = isDark ? darkBg : lightBg;
+
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  useEffect(() => {
+    function onResize() {
+      setIsMobile(window.innerWidth < 768);
+    }
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const bg = isMobile ? (isDark ? darkMobile : lightMobile) : (isDark ? darkBg : lightBg);
   const navigate = useNavigate();
   const { signup } = useAuth();
 

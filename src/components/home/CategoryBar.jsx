@@ -37,7 +37,7 @@ export default function CategoryBar() {
 
   return (
     <div className="w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-      <div className="max-w-8xl mx-auto px-4 md:px-8 flex items-center gap-3 py-1">
+      <div className="max-w-[1680px] mx-auto flex flex-wrap items-center gap-2 px-4 py-2 sm:px-6 lg:px-8 xl:px-10">
 
         {/* Previous Button */}
         {!isStart && (
@@ -55,7 +55,7 @@ export default function CategoryBar() {
         <div
           ref={containerRef}
           onScroll={updateButtons}
-          className="flex flex-1 items-center gap-8 overflow-x-auto py-3 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden scroll-smooth"
+          className="flex min-w-0 flex-1 items-center gap-4 overflow-x-auto py-3 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden scroll-smooth"
         >
           {categories.map((cat) => {
             const isActive = active === cat.name;

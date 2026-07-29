@@ -75,12 +75,13 @@ export default function Navbar({
 
   return (
     <div className="relative w-full">
-      <nav className="w-full h-16 md:h-20 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 md:px-8 bg-white dark:bg-gray-900 sticky top-0 z-50">
-        {/* 1. Logo Section */}
-        <div
-          className={`flex items-center gap-2 cursor-pointer shrink-0 ${mobileSearchActive ? 'hidden' : 'flex'}`}
-          onClick={() => navigate("/")}
-        >
+      <nav className="w-full h-16 md:h-20 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 sticky top-0 z-50">
+        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-10">
+          {/* 1. Logo Section */}
+          <div
+            className={`flex items-center gap-2 cursor-pointer shrink-0 ${mobileSearchActive ? 'hidden' : 'flex'}`}
+            onClick={() => navigate("/")}
+          >
           <StayNestLogo width={30} height={34} />
           <span className="text-base md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Stay<span className="text-[#FF385C]">Nest</span>
@@ -143,12 +144,19 @@ export default function Navbar({
           {variant === "auth" && <div />} {/* empty center */}
         </div>
 
-        {/* 3. Right Side Options */}
-        <div className={`items-center gap-3 shrink-0 ${mobileSearchActive ? 'hidden' : 'flex'}`}>
-          {/* Dark Mode Toggle (desktop only) */}
+          {/* 3. Right Side Options */}
+          <div className={`items-center gap-3 shrink-0 ${mobileSearchActive ? 'hidden' : 'flex'}`}>
+            {/* Dark Mode Toggle (desktop only) */}
           <div className="hidden md:block">
             <ThemeToggle />
           </div>
+
+          {/* Mobile-only toggle for auth pages */}
+          {variant === 'auth' && (
+            <div className="block md:hidden mr-2">
+              <ThemeToggle />
+            </div>
+          )}
 
           {/* Wide-screen actions for logged-in users only */}
           {user && (variant === "default" || variant === "host-dashboard") && (
@@ -280,13 +288,20 @@ export default function Navbar({
                       />
                     </>
                   )}
+
+                  <div className="block md:hidden px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">Theme</span>
+                      <ThemeToggle />
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
           {/* 4. Mobile Menu Button removed for new navbar design */}
-        
+        </div>
       </nav>
 
       {isProfileMenuOpen && (

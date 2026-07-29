@@ -233,7 +233,7 @@ export default function HostWizard() {
     />,
     <PricingStep />,
     // Success screen
-    <div className="max-w-2xl mx-auto px-4 sm:px-8 md:px-16 py-12 sm:py-20 text-center">
+    <div className="max-w-2xl mx-auto px-8 md:px-16 py-20 text-center">
       <div className="text-6xl mb-6">🎉</div>
       <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">Your listing is ready!</h1>
       <p className="mt-3 text-gray-600 dark:text-gray-400">You can now view it on your dashboard.</p>
@@ -300,7 +300,7 @@ export default function HostWizard() {
                 </div>
               ))}
             </div>
-            <div className="flex items-center justify-between px-4 sm:px-8 md:px-16 py-4 gap-3">
+            <div className="flex items-center justify-between px-8 md:px-16 py-4">
               <button
                 onClick={onBack}
                 disabled={index === 0}
@@ -315,7 +315,7 @@ export default function HostWizard() {
               <button
                 onClick={onNext}
                 disabled={nextDisabled}
-                className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg text-sm font-semibold transition-colors ${nextDisabled
+                className={`px-6 py-3 rounded-lg text-sm font-semibold transition-colors ${nextDisabled
                   ? "bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                   : "bg-[#fd4148] text-white hover:bg-[#f13c46] dark:bg-[#fd4148] dark:hover:bg-[#f13c46]"
                   }`}

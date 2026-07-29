@@ -299,7 +299,7 @@ export default function SearchBar({ onMobileActiveChange }) {
         className={
           mobileActive
             ? 'fixed top-3 left-1/2 -translate-x-1/2 z-50 flex w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] h-12 items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-shadow duration-200 px-2 pt-2 pb-1'
-            : 'hidden md:flex flex-1 w-full max-w-full md:max-w-lg lg:max-w-xl mx-auto h-12 items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-shadow duration-200 relative px-2 pt-2 pb-1'
+            : 'hidden md:flex md:w-3/4 lg:w-3/4 xl:w-3/4 mx-auto max-w-full md:max-w-2xl lg:max-w-3xl xl:max-w-[52rem] h-12 items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-shadow duration-200 relative px-2 pt-2 pb-1'
         + (active ? ' bg-gray-100 dark:bg-gray-700 shadow-md' : ' shadow-sm hover:shadow-md')
         }
       >

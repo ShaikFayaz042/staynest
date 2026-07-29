@@ -47,12 +47,12 @@ export default function ImageGallery({ list }) {
 
   return (
     <section className="mt-4">
-      <div className="flex items-start justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <h1 className="max-w-[65ch] text-2xl font-bold text-gray-900 dark:text-white">
           {list.title || "Luxury Lakeside 2BHK Villa | Near Baga Beach"}
         </h1>
 
-        <div className="flex items-center gap-4 text-sm text-gray-800 dark:text-gray-300">
+        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-800 dark:text-gray-300">
           <button className="flex items-center gap-1 underline">
             <i className="fa-solid fa-arrow-up-from-bracket" /> Share
           </button>

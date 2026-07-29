@@ -38,7 +38,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen w-full mx-auto px-4 sm:px-6 lg:px-10 bg-white dark:bg-gray-900 overflow-hidden">
+    <div className="min-h-screen w-full mx-auto px-4 sm:px-6 lg:px-10 bg-white dark:bg-gray-900 overflow-x-hidden">
       {showIntroOverlay && (
         <div className="fixed inset-0 z-999 flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-sm overflow-hidden">
           <div className="relative w-full max-w-5xl overflow-hidden rounded-3xl bg-black shadow-2xl">

@@ -356,7 +356,7 @@ export default function RatingSummary({ reviewIds = [] }) {
       <style>{LAUREL_STYLES}</style>
 
       {/* Rating Animation – wrapped in a premium glass card */}
-      <div className="mx-auto max-w-2xl rounded-3xl bg-white dark:bg-zinc-900/80 backdrop-blur-xl border border-gray-200 dark:border-zinc-800 shadow-xl p-6">
+      <div className="mx-auto w-full max-w-2xl lg:max-w-full rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl p-6">
         <div className="mb-4 flex flex-col items-center">
           <AnimatedRating targetRating={overallRating} />
           <p className="mt-3 text-lg font-semibold text-gray-900 dark:text-zinc-100">
@@ -373,26 +373,30 @@ export default function RatingSummary({ reviewIds = [] }) {
         </div>
 
         {/* Progress Bars & Categories */}
-        <div className="grid grid-cols-7 gap-4 border-t border-gray-200 dark:border-zinc-800 pt-6 text-sm">
+        <div className="grid grid-cols-1 gap-4 border-t border-gray-200 dark:border-zinc-800 pt-6 text-sm md:grid-cols-7">
           <div>
             <div className="mb-2 text-xs font-semibold text-gray-900 dark:text-zinc-100">Overall rating</div>
-            {bars.map((b) => (
-              <div key={b.star} className="flex items-center gap-2">
-                <span className="w-3 text-xs text-gray-700 dark:text-zinc-400">{b.star}</span>
-                <div className="h-1 flex-1 rounded-full bg-gray-200 dark:bg-zinc-700">
-                  <div
-                    className="h-full rounded-full bg-gray-900 dark:bg-zinc-100"
-                    style={{ width: `${b.percent}%` }}
-                  />
+            <div className="space-y-3">
+              {bars.map((b) => (
+                <div key={b.star} className="flex items-center gap-2">
+                  <span className="w-3 text-xs text-gray-700 dark:text-zinc-400">{b.star}</span>
+                  <div className="h-1 flex-1 rounded-full bg-gray-200 dark:bg-zinc-700">
+                    <div
+                      className="h-full rounded-full bg-gray-900 dark:bg-zinc-100"
+                      style={{ width: `${b.percent}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
           {categories.map((c) => (
-            <div key={c.label} className="border-l border-gray-200 dark:border-zinc-800 pl-4">
-              <div className="text-xs font-semibold text-gray-900 dark:text-zinc-100">{c.label}</div>
-              <div className="mt-1 text-lg font-semibold text-gray-900 dark:text-zinc-100">{c.value}</div>
-              <i className={`fa-solid ${c.icon} mt-2 text-xl text-gray-800 dark:text-zinc-300`} />
+            <div key={c.label} className="rounded-3xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-4 md:border-none md:bg-transparent md:p-0 md:pl-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xs font-semibold text-gray-900 dark:text-zinc-100">{c.label}</div>
+                <i className={`fa-solid ${c.icon} text-lg text-gray-500 dark:text-zinc-400`} />
+              </div>
+              <div className="mt-3 text-lg font-semibold text-gray-900 dark:text-zinc-100">{c.value}</div>
             </div>
           ))}
         </div>

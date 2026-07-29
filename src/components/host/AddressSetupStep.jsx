@@ -133,7 +133,7 @@ export default function AddressSetupStep() {
           </div>
         </div>
 
-        <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 sticky top-8 bg-gray-50 dark:bg-gray-900">
+        <div className="hidden md:block rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 sticky top-8 bg-gray-50 dark:bg-gray-900">
           <img
             src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800"
             alt="Villa preview"

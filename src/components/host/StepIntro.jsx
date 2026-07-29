@@ -54,11 +54,11 @@ export default function StepIntro({
 
   return (
     <HostFrame progress={[step >= 1 ? 1 : 0, step >= 2 ? 1 : 0, step >= 3 ? 1 : 0]}>
-      <div className="max-w-6xl mx-auto px-8 md:px-16 py-20 grid md:grid-cols-2 gap-16 items-center">
+      <div className="max-w-6xl mx-auto px-6 md:px-16 py-8 md:py-20 grid md:grid-cols-2 gap-6 md:gap-16 items-center">
         <div>
           <div className="text-sm font-semibold text-gray-500 dark:text-gray-400">Step {step}</div>
-          <h1 className="mt-3 text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">{title}</h1>
-          <p className="mt-6 text-gray-600 dark:text-gray-300 text-lg">{description}</p>
+          <h1 className="mt-2 md:mt-3 text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">{title}</h1>
+          <p className="mt-4 md:mt-6 text-gray-600 dark:text-gray-300 text-lg">{description}</p>
         </div>
         
         <video

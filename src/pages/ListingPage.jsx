@@ -23,10 +23,10 @@ export default function ListingPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <Navbar />
-      <div className="mx-auto max-w-7xl px-6 pb-12">
+      <div className="mx-auto w-full max-w-[1640px] px-4 pb-12 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
         <ImageGallery list={listing} />
-        <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.75fr)_420px] lg:items-start lg:gap-16">
+          <div className="lg:col-span-1">
             <StayInfo list={listing} />
             <BedroomSection list={listing} />
             <Amenities list={listing.amenities} />

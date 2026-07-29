@@ -1,15 +1,28 @@
-﻿import { useContext, useState } from 'react';
+﻿import { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import darkBg from '../assets/images/DarkBG.png';
 import lightBg from '../assets/images/LightBG.png';
+import darkMobile from '../assets/images/DarkBG_mobile.png';
+import lightMobile from '../assets/images/LightBG_mobile.png';
 import Navbar from "../components/common/Navbar";
 import { ThemeContext } from '../context/ThemeContext';
 
 export default function LoginPage() {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const bg = isDark ? darkBg : lightBg;
+
+  // detect mobile viewport (match site breakpoints)
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  useEffect(() => {
+    function onResize() {
+      setIsMobile(window.innerWidth < 768);
+    }
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const bg = isMobile ? (isDark ? darkMobile : lightMobile) : (isDark ? darkBg : lightBg);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

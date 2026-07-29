@@ -16,7 +16,7 @@ export default function ReviewCard({ review }) {
   const avatar = user?.avatar || "";
 
   return (
-    <div className="border border-gray-700 rounded-lg p-4">
+    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center gap-3">
         {avatar ? (
           <img src={avatar} alt={name} className="h-10 w-10 rounded-full object-cover" />
