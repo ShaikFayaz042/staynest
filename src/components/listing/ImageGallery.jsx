@@ -26,6 +26,10 @@ export default function ImageGallery({ list }) {
     setSaveToggle(!saveToggle);
   };
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   useEffect(() => {
     // init canNext based on images
     setCanNext(list.images && list.images.length > 1);
@@ -53,6 +57,9 @@ export default function ImageGallery({ list }) {
         </h1>
 
         <div className="flex flex-wrap items-center gap-3 text-sm text-gray-800 dark:text-gray-300">
+          <button onClick={handleBack} className="hidden items-center gap-1 underline md:flex">
+            <i className="fa-solid fa-arrow-left" /> Back
+          </button>
           <button className="flex items-center gap-1 underline">
             <i className="fa-solid fa-arrow-up-from-bracket" /> Share
           </button>

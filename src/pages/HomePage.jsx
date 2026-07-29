@@ -1,12 +1,13 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import Footer from "../components/common/Footer";
 import Navbar from "../components/common/Navbar";
-import CategoryBar from "../components/home/CategoryBar";
+import FilterBar, { defaultFilters } from "../components/home/FilterBar";
 import ListingGrid from "../components/home/ListingGrid";
 import introVideo from "../assets/videos/intro.mp4";
 
 export default function HomePage() {
   const [showIntroOverlay, setShowIntroOverlay] = useState(false);
+  const [activeFilters, setActiveFilters] = useState(defaultFilters);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -61,8 +62,8 @@ export default function HomePage() {
       )}
 
       <Navbar type="hosting" />
-      <CategoryBar />
-      <ListingGrid />
+      <FilterBar onFiltersChange={setActiveFilters} />
+      <ListingGrid filters={activeFilters} />
       <Footer />
     </div>
   );

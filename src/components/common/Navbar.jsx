@@ -8,6 +8,7 @@ import ThemeToggle from "./ThemeToggle"; // ✅ imported ThemeToggle
 export default function Navbar({
   type = "hosting",
   variant = "default", // 'default' | 'host-dashboard' | 'profile' | 'auth'
+  hideSearch = false,
 }) {
   const [mobileSearchActive, setMobileSearchActive] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -90,7 +91,7 @@ export default function Navbar({
 
         {/* 2. Center Section (Search Bar or Tabs based on variant) */}
         <div className="flex-1 flex justify-center">
-          {variant === "default" && (
+          {variant === "default" && !hideSearch && (
             <SearchBar onMobileActiveChange={setMobileSearchActive} />
           )}
 
