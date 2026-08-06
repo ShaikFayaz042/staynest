@@ -1,11 +1,31 @@
-﻿import { useMemo } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import ScrollRow from './ScrollRow';
 import { defaultFilters } from './FilterBar';
 
-const listings = JSON.parse(localStorage.getItem('listings')) || [];
+// const listings = JSON.parse(localStorage.getItem('listings')) || [];
+const apiUrl = import.meta.env.VITE_API_URL;
+
+async function getListings() {
+  const response = await fetch(`${apiUrl}/listings`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch listings");
+  }
+
+  return response.json();
+}
 
 export default function ListingGrid({ filters = defaultFilters }) {
+  const [listings, setListings] = useState([]);
+   useEffect(() => {
+    async function fetchListings() {
+      const data = await getListings();
+      setListings(data.data);
+    }
+
+    fetchListings();
+  }, []);
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q')?.trim().toLowerCase() || '';
@@ -21,48 +41,48 @@ export default function ListingGrid({ filters = defaultFilters }) {
       .filter((listing) => {
         const matchesQuery = query
           ? [
-              listing.location.city,
-              listing.location.state,
-              listing.location.country,
-              listing.title,
-              listing.description,
-            ]
-              .join(' ')
-              .toLowerCase()
-              .includes(query)
+            listing.location.city,
+            listing.location.state,
+            listing.location.country,
+            listing.title,
+            listing.description,
+          ]
+            .join(' ')
+            .toLowerCase()
+            .includes(query)
           : true;
 
         const matchesGuests = minGuests > 0 ? listing.guests >= minGuests : true;
 
         const matchesPropertyType = normalizedFilters.propertyType
           ? [normalizedFilters.propertyType.toLowerCase(), listing.category?.toLowerCase()].some((value) => {
-              if (!value) return false;
-              if (value.includes('flat') || value.includes('apartment')) {
-                return listing.category?.toLowerCase().includes('apartment') || listing.category?.toLowerCase().includes('flat');
-              }
-              if (value.includes('farm')) {
-                return listing.category?.toLowerCase().includes('farm');
-              }
-              return value === listing.category?.toLowerCase();
-            })
+            if (!value) return false;
+            if (value.includes('flat') || value.includes('apartment')) {
+              return listing.category?.toLowerCase().includes('apartment') || listing.category?.toLowerCase().includes('flat');
+            }
+            if (value.includes('farm')) {
+              return listing.category?.toLowerCase().includes('farm');
+            }
+            return value === listing.category?.toLowerCase();
+          })
           : true;
 
         const matchesPrice = normalizedFilters.priceRange
           ? (() => {
-              if (normalizedFilters.priceRange === '0-3000') {
-                return listing.pricePerNight <= 3000;
-              }
-              if (normalizedFilters.priceRange === '3000-6000') {
-                return listing.pricePerNight > 3000 && listing.pricePerNight <= 6000;
-              }
-              if (normalizedFilters.priceRange === '6000-10000') {
-                return listing.pricePerNight > 6000 && listing.pricePerNight <= 10000;
-              }
-              if (normalizedFilters.priceRange === '10000+') {
-                return listing.pricePerNight > 10000;
-              }
-              return true;
-            })()
+            if (normalizedFilters.priceRange === '0-3000') {
+              return listing.pricePerNight <= 3000;
+            }
+            if (normalizedFilters.priceRange === '3000-6000') {
+              return listing.pricePerNight > 3000 && listing.pricePerNight <= 6000;
+            }
+            if (normalizedFilters.priceRange === '6000-10000') {
+              return listing.pricePerNight > 6000 && listing.pricePerNight <= 10000;
+            }
+            if (normalizedFilters.priceRange === '10000+') {
+              return listing.pricePerNight > 10000;
+            }
+            return true;
+          })()
           : true;
 
         const matchesRating = normalizedFilters.minRating > 0 ? listing.rating >= normalizedFilters.minRating : true;
@@ -71,8 +91,8 @@ export default function ListingGrid({ filters = defaultFilters }) {
         const matchesAmenities = normalizedFilters.amenities.length === 0
           ? true
           : normalizedFilters.amenities.every((amenity) =>
-              listing.amenities?.some((item) => item.toLowerCase() === amenity.toLowerCase() || item.toLowerCase().includes(amenity.toLowerCase()))
-            );
+            listing.amenities?.some((item) => item.toLowerCase() === amenity.toLowerCase() || item.toLowerCase().includes(amenity.toLowerCase()))
+          );
 
         const matchesBedrooms = normalizedFilters.bedrooms
           ? listing.bedroomsCount >= Number(normalizedFilters.bedrooms)
@@ -113,7 +133,7 @@ export default function ListingGrid({ filters = defaultFilters }) {
             return 0;
         }
       });
-  }, [filters, query, minGuests]);
+  }, [filters, query, minGuests, listings]);
 
   const groupedListings = filteredListings.reduce((groups, listing) => {
     const city = listing.location.city;

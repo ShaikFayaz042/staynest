@@ -1,6 +1,7 @@
-﻿import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 function parseDate(value) {
   if (!value) return null;
@@ -14,7 +15,6 @@ function hasDateOverlap(startA, endA, startB, endB) {
 
 export default function BookingCard({ list }) {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const pricePerNight = list.pricePerNight || 0;
   const maxGuests = list.guests || 1;
@@ -23,28 +23,59 @@ export default function BookingCard({ list }) {
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
   const [message, setMessage] = useState("");
+  const [bookings, setBookings] = useState([]);
 
   const nights = checkIn && checkOut ? Math.max(0, Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24))) : 0;
   const total = pricePerNight * nights;
 
+  useEffect(() => {
+    const controller = new AbortController();
+    const listingId = list._id || list.id;
+
+    async function loadBookings() {
+      if (!listingId) {
+        setBookings([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${apiUrl}/bookings?listing=${listingId}`, { signal: controller.signal });
+        if (!response.ok) {
+          throw new Error("Failed to fetch bookings");
+        }
+
+        const data = await response.json();
+        setBookings(Array.isArray(data?.data) ? data.data : []);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error(err);
+        }
+        setBookings([]);
+      }
+    }
+
+    loadBookings();
+    return () => controller.abort();
+  }, [list]);
+
   const conflictingBooking = useMemo(() => {
     if (!checkIn || !checkOut || nights <= 0) return null;
 
-    const bookings = JSON.parse(localStorage.getItem("bookings")) || [];
     const start = parseDate(checkIn);
     const end = parseDate(checkOut);
+    const listingId = String(list._id || list.id || "");
 
     return bookings.find((booking) => {
-      if (booking.listingId !== list.id || booking.status === "cancelled") return false;
-      const bookingStart = parseDate(booking.checkIn);
-      const bookingEnd = parseDate(booking.checkOut);
+      if (String(booking.listing || booking.listingId || "") !== listingId || booking.status === "cancelled") return false;
+      const bookingStart = parseDate(new Date(booking.checkIn).toISOString().split("T")[0]);
+      const bookingEnd = parseDate(new Date(booking.checkOut).toISOString().split("T")[0]);
       return bookingStart && bookingEnd && hasDateOverlap(start, end, bookingStart, bookingEnd);
     }) || null;
-  }, [checkIn, checkOut, list.id, nights]);
+  }, [checkIn, checkOut, list, nights, bookings]);
 
   const availabilityMessage = useMemo(() => {
     if (!conflictingBooking) return "";
-    if (user && conflictingBooking.userId === user.id) {
+    if (user && String(conflictingBooking.user || conflictingBooking.userId || "") === String(user.id)) {
       return `You already have a reservation for ${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}.`;
     }
     return `These dates are already reserved for this listing (${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}).`;
@@ -57,7 +88,7 @@ export default function BookingCard({ list }) {
     }
   };
 
-  const handleReserve = () => {
+  const handleReserve = async () => {
     if (!user) {
       setMessage("Please log in to book this listing.");
       setTimeout(() => setMessage(""), 4000);
@@ -73,46 +104,52 @@ export default function BookingCard({ list }) {
     }
 
     if (conflictingBooking) {
-      setMessage(user && conflictingBooking.userId === user.id
+      setMessage(user && String(conflictingBooking.user || conflictingBooking.userId || "") === String(user.id)
         ? `You already have a reservation for ${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}.`
         : `These dates are already reserved for this listing (${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}).`);
       return;
     }
 
-    const bookings = JSON.parse(localStorage.getItem("bookings")) || [];
-    const maxId = bookings.reduce((max, b) => {
-      const num = parseInt(b.id.replace("bk", ""));
-      return num > max ? num : max;
-    }, 0);
-    const newBooking = {
-      id: `bk${maxId + 1}`,
-      userId: user.id,
-      listingId: list.id,
+    const listingId = list._id || list.id;
+    const payload = {
+      user: user.id,
+      listing: listingId,
       checkIn,
       checkOut,
       guests,
       totalPrice: total,
       status: "confirmed",
-      createdAt: new Date().toISOString(),
+      paymentStatus: "pending",
+      specialRequests: "",
     };
-    bookings.push(newBooking);
-    localStorage.setItem("bookings", JSON.stringify(bookings));
 
-    const listings = JSON.parse(localStorage.getItem("listings")) || [];
-    const listingIndex = listings.findIndex((listing) => listing.id === list.id);
-    if (listingIndex !== -1) {
-      listings[listingIndex] = {
-        ...listings[listingIndex],
-        bookingIds: [...(listings[listingIndex].bookingIds || []), newBooking.id],
-      };
-      localStorage.setItem("listings", JSON.stringify(listings));
+    try {
+      const response = await fetch(`${apiUrl}/bookings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create booking");
+      }
+
+      const data = await response.json();
+      const createdBooking = data?.data;
+      if (createdBooking) {
+        setBookings((prev) => [...prev, createdBooking]);
+      }
+
+      setMessage("Booking confirmed! 🎉");
+      setTimeout(() => setMessage(""), 4000);
+      setCheckIn("");
+      setCheckOut("");
+      setGuests(1);
+    } catch (err) {
+      console.error(err);
+      setMessage("Unable to confirm booking. Please try again.");
+      setTimeout(() => setMessage(""), 4000);
     }
-
-    setMessage("Booking confirmed! 🎉");
-    setTimeout(() => setMessage(""), 4000);
-    setCheckIn("");
-    setCheckOut("");
-    setGuests(1);
   };
 
   return (

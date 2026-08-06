@@ -3,7 +3,20 @@ import Review from "../models/Review.js";
 
 export async function getReviews(req, res) {
   try {
-    const reviews = await Review.find();
+    const filter = {};
+    const { listing } = req.query;
+
+    if (listing) {
+      if (!mongoose.Types.ObjectId.isValid(listing)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid listing id",
+        });
+      }
+      filter.listing = listing;
+    }
+
+    const reviews = await Review.find(filter).populate("user", "name avatar profile joinedAt");
     res.status(200).json({
       success: true,
       message: "Reviews fetched successfully",
@@ -29,7 +42,7 @@ export async function getReviewById(req, res) {
       });
     }
 
-    const review = await Review.findById(id);
+    const review = await Review.findById(id).populate("user", "name avatar profile joinedAt");
 
     if (!review) {
       return res.status(404).json({

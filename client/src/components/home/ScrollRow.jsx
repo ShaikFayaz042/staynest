@@ -74,9 +74,9 @@ export default function ScrollRow({ title, listings }) {
         ref={scrollerRef}
         className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-2 pb-2 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
-        {listings.map((listing) => (
+        {listings.map((listing, index) => (
           <div
-            key={listing.id}
+            key={`${listing.id}-${index}`}
             className="min-w-0 w-[min(100%,220px)] shrink-0 snap-start sm:w-[min(100%,260px)] md:w-[calc((100%-3rem)/3)] lg:w-[calc((100%-4rem)/4)] xl:w-[calc((100%-5rem)/5)] 2xl:w-[calc((100%-6rem)/6)]"
           >
             <ListingCard listing={listing} />

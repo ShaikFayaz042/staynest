@@ -126,15 +126,15 @@ export default function ImageGallery({ list }) {
         </div>
       </div>
 
-      <div className={`hidden md:block mt-4 overflow-hidden transition-[max-height] duration-700 ease-in-out ${
-          showAllPhotos ? "max-h-[5000px]" : "max-h-[60vh] min-h-100 rounded-2xl"
+      <div className={`hidden md:block mt-4 overflow-hidden transition-all duration-700 ease-in-out ${
+          showAllPhotos ? "" : "rounded-2xl"
         }`}>
 
         <div
-          className={`grid gap-2 transition-all duration-700 ${
+          className={`grid gap-1 transition-all duration-700 ${
             showAllPhotos
-              ? "grid-cols-1 md:grid-cols-2 h-auto"
-              : "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 grid-rows-2 h-full"
+              ? "grid-cols-1 md:grid-cols-2"
+              : "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 grid-rows-2 auto-rows-fr"
           }`}
         >
           {list.images.map((image, index) => {
@@ -144,19 +144,24 @@ export default function ImageGallery({ list }) {
             return (
               <div
                 key={index}
-                className={`relative w-full ${
+                className={`relative w-full overflow-hidden ${
                   isHiddenWhenClosed ? "hidden" : "block"
-                } ${isMainImage ? "md:col-span-2 md:row-span-2" : ""} ${
-                  showAllPhotos ? "h-64 md:h-100" : "h-full"
-                }`}
+                } ${isMainImage ? "md:col-span-2 md:row-span-2" : ""}`}
               >
-                <img
-                  src={image}
-                  alt={`Property view ${index + 1}`}
-                  className={`h-full w-full object-cover ${
-                    showAllPhotos ? "rounded-xl" : ""
-                  }`}
-                />
+                <div className={`${
+                  showAllPhotos
+                    ? "aspect-[4/3] rounded-xl"
+                    : isMainImage
+                    ? "aspect-[16/10] h-full"
+                    : "aspect-[4/3]"
+                } overflow-hidden w-full`}
+                >
+                  <img
+                    src={image}
+                    alt={`Property view ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
 
                 {!showAllPhotos && index === 4 && (
                   <button

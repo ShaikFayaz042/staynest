@@ -1,16 +1,42 @@
 ﻿import { useEffect, useState } from "react";
 import ReviewCard from "./ReviewCard";
 
-export default function ReviewSection({ reviewIds = [] }) {
+const apiUrl = import.meta.env.VITE_API_URL;
+
+export default function ReviewSection({ listingId }) {
   const [reviews, setReviews] = useState([]);
   const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
-    const allReviews = JSON.parse(localStorage.getItem("reviews")) || [];
-    const filtered = allReviews.filter(r => reviewIds.includes(r.id));
-    setReviews(filtered);
-    setShowAll(false);
-  }, [reviewIds]);
+    const controller = new AbortController();
+    const fetchReviews = async () => {
+      if (!listingId) {
+        setReviews([]);
+        setShowAll(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${apiUrl}/reviews?listing=${listingId}`, { signal: controller.signal });
+        if (!response.ok) {
+          throw new Error("Failed to fetch reviews");
+        }
+
+        const data = await response.json();
+        setReviews(Array.isArray(data?.data) ? data.data : []);
+        setShowAll(false);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error(err);
+        }
+        setReviews([]);
+        setShowAll(false);
+      }
+    };
+
+    fetchReviews();
+    return () => controller.abort();
+  }, [listingId]);
 
   if (reviews.length === 0) {
     return (
@@ -27,7 +53,7 @@ export default function ReviewSection({ reviewIds = [] }) {
     <section className="border-b border-gray-200 dark:border-gray-700 py-8">
       <div className="grid grid-cols-2 gap-x-12 gap-y-8">
         {displayedReviews.map((r) => (
-          <ReviewCard key={r.id} review={r} />
+          <ReviewCard key={r._id || r.id} review={r} />
         ))}
       </div>
 

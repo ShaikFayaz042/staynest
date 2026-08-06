@@ -3,7 +3,30 @@ import Booking from "../models/Booking.js";
 
 export async function getBookings(req, res) {
   try {
-    const bookings = await Booking.find();
+    const filter = {};
+    const { listing, user } = req.query;
+
+    if (listing) {
+      if (!mongoose.Types.ObjectId.isValid(listing)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid listing id",
+        });
+      }
+      filter.listing = listing;
+    }
+
+    if (user) {
+      if (!mongoose.Types.ObjectId.isValid(user)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid user id",
+        });
+      }
+      filter.user = user;
+    }
+
+    const bookings = await Booking.find(filter);
     res.status(200).json({
       success: true,
       message: "Bookings fetched successfully",

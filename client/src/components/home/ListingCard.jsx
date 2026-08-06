@@ -7,10 +7,10 @@ export default function ListingCard({ listing }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [saveToggle, setSaveToggle] = useState(false);
-  const saved = isListingSaved(user?.id, listing.id);
+  const saved = isListingSaved(user?.id, listing._id);
 
   const handleClick = () => {
-    navigate(`/listing/${listing.id}`);
+    navigate(`/listing/${listing._id}`);
   };
 
   const handleSaveClick = (e) => {
@@ -19,7 +19,7 @@ export default function ListingCard({ listing }) {
       navigate("/login");
       return;
     }
-    toggleListingWishlist(user.id, listing.id);
+    toggleListingWishlist(user.id, listing._id);
     setSaveToggle(!saveToggle);
   };
 

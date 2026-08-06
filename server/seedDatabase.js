@@ -13,18 +13,23 @@ import reviewsData from "../client/src/data/reviews.js";
 
 dotenv.config();
 
-const LISTING_COUNT = 20;
+const LISTING_COUNT = 25;
+
+// Minimum constraints: need 4 cities with 6+ listings => 24 listings, plus one more city => 25
 
 function normalizeRoles(roles = []) {
-  return Array.from(new Set(
-    roles.map((role) => {
-      if (typeof role !== "string") return role;
-      const lower = role.toLowerCase();
-      if (lower === "host") return "Host";
-      if (lower === "traveller" || lower === "traveler") return "Guest";
-      return role;
-    })
-  ));
+  return Array.from(
+    new Set(
+      (roles || []).map((role) => {
+        if (typeof role !== "string") return role;
+        const lower = role.toLowerCase();
+        if (lower === "host") return "Host";
+        if (lower === "traveller" || lower === "traveler") return "Guest";
+        // Capitalize first letter for other roles
+        return role.charAt(0).toUpperCase() + role.slice(1);
+      })
+    )
+  );
 }
 
 function ensureUniqueWishlistPairs(items) {
@@ -56,6 +61,112 @@ function normalizePaymentStatus(status = "") {
   return "pending";
 }
 
+const ALLOWED_CATEGORIES = new Set([
+  "House", "Flat / apartment", "Barn", "Bed & breakfast", "Boat", 
+  "Cabin", "Campervan / motorhome", "Casa particular", "Castle", 
+  "Cave", "Container", "Cycladic home", "Dammuso", "Dome", 
+  "Earth home", "Farm", "Guest house", "Hotel", "Houseboat", 
+  "Minsu", "Riad", "Ryokan", "Shepherd's hut", "Tent", 
+  "Tiny home", "Tower", "Tree house", "Trullo", "Windmill", "Yurt"
+]);
+
+const ALLOWED_AMENITIES = new Set([
+  "Air conditioning", "Essentials", "Fridge", "Heating", "Hot water",
+  "Kitchen", "TV", "Tumble dryer", "Washing machine", "Wifi",
+  "Coffee maker", "Cooking basics", "Hairdryer", "Hangers", "Iron",
+  "Shampoo", "Dedicated workspace", "EV charger", "Free parking", "Gym",
+  "Hot tub", "Indoor fireplace", "Outdoor furniture", "Pool",
+  "Beach access", "Waterfront", "Mountain view", "City view", "Garden view",
+  "Carbon monoxide alarm", "Smoke alarm", "First aid kit", 
+  "Fire extinguisher", "Security cameras"
+]);
+
+function normalizeListingCategory(cat) {
+  if (!cat) return "House";
+  const trimmed = String(cat).trim();
+  if (ALLOWED_CATEGORIES.has(trimmed)) return trimmed;
+  const lower = trimmed.toLowerCase();
+  if (lower.includes("penthouse") || lower.includes("apartment") || lower.includes("flat")) {
+    return "Flat / apartment";
+  }
+  if (lower.includes("hotel")) return "Hotel";
+  if (lower.includes("cabin")) return "Cabin";
+  return "House"; // fallback
+}
+
+function normalizeAmenities(list = []) {
+  return (list || []).filter((a) => ALLOWED_AMENITIES.has(a));
+}
+
+function selectListingsForConstraints(allListings, desiredCount) {
+  // Group by city
+  const byCity = new Map();
+  allListings.forEach((l) => {
+    const city = (l.location && l.location.city) ? l.location.city : "Unknown";
+    if (!byCity.has(city)) byCity.set(city, []);
+    byCity.get(city).push(l);
+  });
+
+  // Sort cities by availability
+  const cities = [...byCity.entries()].sort((a, b) => b[1].length - a[1].length);
+
+  const selected = [];
+  const usedIds = new Set();
+
+  // Step 1: ensure at least 5 distinct cities (one from each if possible)
+  for (let i = 0; i < Math.min(5, cities.length); i++) {
+    const arr = cities[i][1];
+    for (const l of arr) {
+      if (!usedIds.has(l.id)) {
+        selected.push(l);
+        usedIds.add(l.id);
+        break;
+      }
+    }
+  }
+
+  // Step 2: try to make 4 cities have 6+ listings
+  let citiesWithSix = 0;
+  // Make a copy of cities sorted by available
+  const citiesByAvail = [...cities];
+  for (let i = 0; i < citiesByAvail.length && citiesWithSix < 4; i++) {
+    const [city, arr] = citiesByAvail[i];
+    // fill this city's selections up to 6
+    const needed = 6 - arr.filter((l) => usedIds.has(l.id)).length;
+    let added = 0;
+    for (const l of arr) {
+      if (added >= needed) break;
+      if (usedIds.has(l.id)) continue;
+      selected.push(l);
+      usedIds.add(l.id);
+      added++;
+    }
+    const totalForCity = arr.filter((l) => usedIds.has(l.id)).length;
+    if (totalForCity >= 6) citiesWithSix++;
+  }
+
+  // Step 3: fill remaining slots preferring cities with most remaining listings
+  const flat = allListings.filter((l) => !usedIds.has(l.id));
+  flat.sort((a, b) => 0); // keep original order
+  for (const l of flat) {
+    if (selected.length >= desiredCount) break;
+    selected.push(l);
+    usedIds.add(l.id);
+  }
+
+  // Final trim to desiredCount
+  return selected.slice(0, desiredCount);
+}
+
+function normalizeReviewCategories(categories = {}) {
+  const keys = ["cleanliness", "accuracy", "checkIn", "communication", "location", "value"];
+  return keys.reduce((acc, key) => {
+    const value = typeof categories[key] === "number" ? categories[key] : null;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+
 function normalizeReviewReference(review, userIdMap, listingIdMap, bookingIdMap) {
   const user = userIdMap.get(review.userId);
   const listing = listingIdMap.get(review.listingId);
@@ -67,6 +178,7 @@ function normalizeReviewReference(review, userIdMap, listingIdMap, bookingIdMap)
       ? bookingIdMap.get(review.bookingId)
       : null,
     rating: review.rating ?? 0,
+    categories: normalizeReviewCategories(review.categories),
     comment: review.comment || "",
     isApproved: review.isApproved !== undefined ? review.isApproved : true,
   };
@@ -79,14 +191,14 @@ function normalizeWishlistReference(userId, listingId, userIdMap, listingIdMap) 
   return { user, listing };
 }
 
-function buildIdMaps() {
+function buildIdMaps(selectedListings = []) {
   const userIdMap = new Map();
   const listingIdMap = new Map();
   const bookingIdMap = new Map();
   const reviewIdMap = new Map();
 
   usersData.forEach((user) => userIdMap.set(user.id, new mongoose.Types.ObjectId()));
-  listingsData.slice(0, LISTING_COUNT).forEach((listing) => listingIdMap.set(listing.id, new mongoose.Types.ObjectId()));
+  selectedListings.forEach((listing) => listingIdMap.set(listing.id, new mongoose.Types.ObjectId()));
   bookingsData.forEach((booking) => bookingIdMap.set(booking.id, new mongoose.Types.ObjectId()));
   reviewsData.forEach((review) => reviewIdMap.set(review.id, new mongoose.Types.ObjectId()));
 
@@ -108,13 +220,13 @@ function buildUserDocs(userIdMap) {
   }));
 }
 
-function buildListingDocs(listingIdMap, userIdMap) {
-  return listingsData.slice(0, LISTING_COUNT).map((listing) => ({
+function buildListingDocs(listingIdMap, userIdMap, selectedListings) {
+  return selectedListings.map((listing) => ({
     _id: listingIdMap.get(listing.id),
     host: userIdMap.get(listing.hostId),
     title: listing.title,
     description: listing.description,
-    category: listing.category,
+    category: normalizeListingCategory(listing.category),
     location: {
       country: listing.location?.country || "",
       state: listing.location?.state || "",
@@ -135,7 +247,7 @@ function buildListingDocs(listingIdMap, userIdMap) {
       beds: bedroom.beds ?? 1,
       images: bedroom.images ?? [],
     })),
-    amenities: listing.amenities ?? [],
+    amenities: normalizeAmenities(listing.amenities ?? []),
     discount: listing.discount ?? 0,
   }));
 }
@@ -195,10 +307,12 @@ async function seedDatabase() {
     Wishlist.deleteMany({}),
   ]);
 
-  const { userIdMap, listingIdMap, bookingIdMap, reviewIdMap } = buildIdMaps();
+  const selectedListings = selectListingsForConstraints(listingsData, LISTING_COUNT);
+
+  const { userIdMap, listingIdMap, bookingIdMap, reviewIdMap } = buildIdMaps(selectedListings);
 
   const users = buildUserDocs(userIdMap);
-  const listings = buildListingDocs(listingIdMap, userIdMap);
+  const listings = buildListingDocs(listingIdMap, userIdMap, selectedListings);
   const bookings = buildBookingDocs(bookingIdMap, userIdMap, listingIdMap);
   const reviews = buildReviewDocs(reviewIdMap, userIdMap, listingIdMap, bookingIdMap);
   const wishlists = buildWishlistDocs(userIdMap, listingIdMap);

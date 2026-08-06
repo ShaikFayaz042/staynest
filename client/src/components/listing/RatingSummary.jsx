@@ -1,5 +1,7 @@
 ﻿import { useEffect, useRef, useState } from "react";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const CATEGORY_MAP = {
   cleanliness: { label: "Cleanliness", icon: "fa-spray-can-sparkles" },
   accuracy: { label: "Accuracy", icon: "fa-circle-check" },
@@ -297,47 +299,83 @@ function AnimatedRating({ targetRating }) {
   );
 }
 
-export default function RatingSummary({ reviewIds = [] }) {
+export default function RatingSummary({ listingId }) {
   const [reviews, setReviews] = useState([]);
   const [overallRating, setOverallRating] = useState(0);
   const [categoryAverages, setCategoryAverages] = useState({});
   const [ratingDistribution, setRatingDistribution] = useState({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
 
   useEffect(() => {
-    const allReviews = JSON.parse(localStorage.getItem("reviews")) || [];
-    const listingReviews = allReviews.filter(r => reviewIds.includes(r.id));
-    setReviews(listingReviews);
-    if (listingReviews.length === 0) return;
+    const controller = new AbortController();
+    const fetchReviews = async () => {
+      if (!listingId) {
+        setReviews([]);
+        setOverallRating(0);
+        setCategoryAverages({});
+        setRatingDistribution({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
+        return;
+      }
 
-    const totalRating = listingReviews.reduce((sum, r) => sum + (r.rating || 0), 0);
-    const avg = listingReviews.length ? totalRating / listingReviews.length : 0;
-    setOverallRating(Math.round(avg * 10) / 10);
+      try {
+        const response = await fetch(`${apiUrl}/reviews?listing=${listingId}`, { signal: controller.signal });
+        if (!response.ok) {
+          throw new Error("Failed to fetch reviews");
+        }
 
-    const catSums = {};
-    const catCounts = {};
-    listingReviews.forEach(r => {
-      if (r.categories) {
-        Object.entries(r.categories).forEach(([key, val]) => {
-          if (CATEGORY_MAP[key]) {
-            catSums[key] = (catSums[key] || 0) + val;
-            catCounts[key] = (catCounts[key] || 0) + 1;
+        const data = await response.json();
+        const listingReviews = Array.isArray(data?.data) ? data.data : [];
+
+        setReviews(listingReviews);
+        if (listingReviews.length === 0) {
+          setOverallRating(0);
+          setCategoryAverages({});
+          setRatingDistribution({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
+          return;
+        }
+
+        const totalRating = listingReviews.reduce((sum, r) => sum + (r.rating || 0), 0);
+        const avg = listingReviews.length ? totalRating / listingReviews.length : 0;
+        setOverallRating(Math.round(avg * 10) / 10);
+
+        const catSums = {};
+        const catCounts = {};
+        listingReviews.forEach((r) => {
+          if (r.categories) {
+            Object.entries(r.categories).forEach(([key, val]) => {
+              if (CATEGORY_MAP[key]) {
+                catSums[key] = (catSums[key] || 0) + val;
+                catCounts[key] = (catCounts[key] || 0) + 1;
+              }
+            });
           }
         });
-      }
-    });
-    const catAvgs = {};
-    Object.keys(catSums).forEach(key => {
-      catAvgs[key] = (catSums[key] / catCounts[key]).toFixed(1);
-    });
-    setCategoryAverages(catAvgs);
 
-    const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    listingReviews.forEach(r => {
-      const rating = Math.round(r.rating || 0);
-      if (rating >= 1 && rating <= 5) dist[rating] = (dist[rating] || 0) + 1;
-    });
-    setRatingDistribution(dist);
-  }, [reviewIds]);
+        const catAvgs = {};
+        Object.keys(catSums).forEach((key) => {
+          catAvgs[key] = (catSums[key] / catCounts[key]).toFixed(1);
+        });
+        setCategoryAverages(catAvgs);
+
+        const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        listingReviews.forEach((r) => {
+          const rating = Math.round(r.rating || 0);
+          if (rating >= 1 && rating <= 5) dist[rating] = (dist[rating] || 0) + 1;
+        });
+        setRatingDistribution(dist);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error(err);
+        }
+        setReviews([]);
+        setOverallRating(0);
+        setCategoryAverages({});
+        setRatingDistribution({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
+      }
+    };
+
+    fetchReviews();
+    return () => controller.abort();
+  }, [listingId]);
 
   const categories = Object.keys(CATEGORY_MAP).map(key => ({
     label: CATEGORY_MAP[key].label,
@@ -391,12 +429,12 @@ export default function RatingSummary({ reviewIds = [] }) {
             </div>
           </div>
           {categories.map((c) => (
-            <div key={c.label} className="rounded-3xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-4 md:border-none md:bg-transparent md:p-0 md:pl-4">
+            <div key={c.label} className="rounded-3xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-4 md:border-none md:bg-transparent md:p-0 md:pl-4 lg:max-w-[170px] lg:p-3 lg:pl-3 lg:justify-self-center">
               <div className="flex items-center justify-between gap-3">
-                <div className="text-xs font-semibold text-gray-900 dark:text-zinc-100">{c.label}</div>
+                <div className="text-xs font-semibold text-gray-900 dark:text-zinc-100 lg:text-[0.72rem]">{c.label}</div>
                 <i className={`fa-solid ${c.icon} text-lg text-gray-500 dark:text-zinc-400`} />
               </div>
-              <div className="mt-3 text-lg font-semibold text-gray-900 dark:text-zinc-100">{c.value}</div>
+              <div className="mt-3 text-lg font-semibold text-gray-900 dark:text-zinc-100 lg:text-base">{c.value}</div>
             </div>
           ))}
         </div>

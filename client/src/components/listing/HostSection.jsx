@@ -1,27 +1,72 @@
 ﻿import { useEffect, useState } from "react";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export default function HostSection({ hostId }) {
   const [host, setHost] = useState(null);
   const [hostStats, setHostStats] = useState({ totalReviews: 0, rating: 0, yearsHosting: 0 });
 
   useEffect(() => {
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    const found = users.find(u => u.id === hostId);
-    setHost(found || null);
-    if (found) {
-      const listings = JSON.parse(localStorage.getItem("listings")) || [];
-      const hostListings = listings.filter(l => l.hostId === hostId);
-      let totalReviews = 0;
-      let totalWeightedRating = 0;
-      hostListings.forEach(l => {
-        totalReviews += l.reviewCount || 0;
-        totalWeightedRating += (l.rating || 0) * (l.reviewCount || 0);
-      });
-      const avgRating = totalReviews > 0 ? totalWeightedRating / totalReviews : 0;
-      const createdAt = found.joinedAt ? new Date(found.joinedAt) : new Date();
-      const years = Math.max(0, Math.floor((Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 365.25)));
-      setHostStats({ totalReviews, rating: Math.round(avgRating * 10) / 10, yearsHosting: years || 0 });
+    const controller = new AbortController();
+
+    async function loadHost() {
+      if (!hostId) {
+        setHost(null);
+        setHostStats({ totalReviews: 0, rating: 0, yearsHosting: 0 });
+        return;
+      }
+
+      try {
+        const [userResponse, listingsResponse] = await Promise.all([
+          fetch(`${apiUrl}/users/${hostId}`, { signal: controller.signal }),
+          fetch(`${apiUrl}/listings`, { signal: controller.signal }),
+        ]);
+
+        if (!userResponse.ok) {
+          throw new Error("Failed to fetch host");
+        }
+        if (!listingsResponse.ok) {
+          throw new Error("Failed to fetch listings");
+        }
+
+        const userData = await userResponse.json();
+        const listingsData = await listingsResponse.json();
+        const found = userData?.data || null;
+        const listings = Array.isArray(listingsData?.data) ? listingsData.data : [];
+
+        setHost(found);
+
+        if (found) {
+          const hostKey = String(found._id || found.id || hostId);
+          const hostListings = listings.filter((listing) => {
+            const listingHostId = String(
+              listing.host?._id || listing.host || listing.hostId || ""
+            );
+            return listingHostId === hostKey;
+          });
+          const totalReviews = hostListings.reduce((sum, listing) => sum + (listing.reviewCount || 0), 0);
+          const totalWeightedRating = hostListings.reduce((sum, listing) => sum + ((listing.rating || 0) * (listing.reviewCount || 0)), 0);
+          const avgRating = totalReviews > 0 ? totalWeightedRating / totalReviews : 0;
+          const createdAt = found.joinedAt ? new Date(found.joinedAt) : new Date();
+          const years = Math.max(0, Math.floor((Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 365.25)));
+
+          setHostStats({
+            totalReviews,
+            rating: Math.round(avgRating * 10) / 10,
+            yearsHosting: years || 0,
+          });
+        }
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error(err);
+        }
+        setHost(null);
+        setHostStats({ totalReviews: 0, rating: 0, yearsHosting: 0 });
+      }
     }
+
+    loadHost();
+    return () => controller.abort();
   }, [hostId]);
 
   if (!host) {
@@ -43,7 +88,7 @@ export default function HostSection({ hostId }) {
             <div className="flex flex-col items-center gap-3 md:items-start">
               <div className="relative inline-block">
                 <img
-                  src={host.avatar || "https://i.pravatar.cc/160?img=13"}
+                  src={host.profile || host.avatar || "https://i.pravatar.cc/160?img=13"}
                   alt={host.name}
                   className="h-28 w-28 rounded-full object-cover"
                 />

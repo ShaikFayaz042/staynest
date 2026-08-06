@@ -29,6 +29,15 @@ const reviewSchema = new mongoose.Schema(
       max: 5,
     },
 
+    categories: {
+      cleanliness: { type: Number, min: 1, max: 5, default: null },
+      accuracy: { type: Number, min: 1, max: 5, default: null },
+      checkIn: { type: Number, min: 1, max: 5, default: null },
+      communication: { type: Number, min: 1, max: 5, default: null },
+      location: { type: Number, min: 1, max: 5, default: null },
+      value: { type: Number, min: 1, max: 5, default: null },
+    },
+
     comment: {
       type: String,
       trim: true,

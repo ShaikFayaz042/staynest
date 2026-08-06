@@ -1,19 +1,11 @@
 ﻿import { useState, useEffect } from "react";
 
 export default function ReviewCard({ review }) {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    if (review.userId) {
-      const users = JSON.parse(localStorage.getItem("users")) || [];
-      const found = users.find(u => u.id === review.userId);
-      setUser(found || null);
-    }
-  }, [review.userId]);
-
+  const user = typeof review.user === "object" && review.user !== null ? review.user : null;
   const date = review.createdAt ? new Date(review.createdAt).toLocaleDateString() : "Unknown";
   const name = user?.name || "Anonymous";
-  const avatar = user?.avatar || "";
+  const avatar = user?.avatar || user?.profile || "";
+  const joinYears = user?.joinedAt ? `${new Date().getFullYear() - new Date(user.joinedAt).getFullYear()} years on StayNest` : "";
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
@@ -28,7 +20,7 @@ export default function ReviewCard({ review }) {
         <div>
           <div className="text-sm font-semibold text-gray-900 dark:text-white">{name}</div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            {user?.joinedAt ? `${new Date().getFullYear() - new Date(user.joinedAt).getFullYear()} years on StayNest` : ""}
+            {joinYears}
           </div>
         </div>
       </div>

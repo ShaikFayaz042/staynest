@@ -10,11 +10,33 @@ import ReviewSection from "../components/listing/ReviewSection";
 import MapSection from "../components/listing/MapSection";
 import HostSection from "../components/listing/HostSection";
 import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+
+const apiUrl = import.meta.env.VITE_API_URL;
+
+async function getListingById(id) {
+  const response = await fetch(`${apiUrl}/listings/${id}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch listing");
+  }
+
+  return response.json();
+}
 
 export default function ListingPage() {
   const { id } = useParams();
-  const listings = JSON.parse(localStorage.getItem('listings')) || [];
-  const listing = listings.find(l => l.id === id);
+  const [listing, setListing] = useState(null);
+
+  useEffect(() => {
+    async function fetchListings() {
+      const data = await getListingById(id);
+      setListing(data.data);
+    }
+
+    fetchListings();
+  }, [id]);
 
   if (!listing) {
     return <div className="text-center py-20 text-gray-900 dark:text-white">Listing not found</div>;
@@ -35,10 +57,14 @@ export default function ListingPage() {
             <BookingCard list={listing} />
           </div>
         </div>
-        <RatingSummary reviewIds={listing.reviewIds || []} />
-        <ReviewSection reviewIds={listing.reviewIds || []} />
+        <RatingSummary listingId={listing._id || listing.id} />
+        <ReviewSection listingId={listing._id || listing.id} />
         <MapSection />
-        <HostSection hostId={listing.hostId} />
+        <HostSection hostId={
+          typeof listing.host === "object"
+            ? listing.host._id || listing.host.id
+            : listing.host || listing.hostId
+        } />
       </div>
       <Footer />
     </div>
