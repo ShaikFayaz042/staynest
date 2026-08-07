@@ -3,7 +3,7 @@ import Wishlist from "../models/Wishlist.js";
 
 export async function getWishlistItems(req, res) {
   try {
-    const wishlistItems = await Wishlist.find();
+    const wishlistItems = await Wishlist.find({ user: req.user.userId });
     res.status(200).json({
       success: true,
       message: "Wishlist items fetched successfully",
@@ -38,6 +38,13 @@ export async function getWishlistItemById(req, res) {
       });
     }
 
+    if (wishlistItem.user.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Wishlist item fetched successfully",
@@ -54,7 +61,10 @@ export async function getWishlistItemById(req, res) {
 
 export async function createWishlistItem(req, res) {
   try {
-    const wishlistItem = await Wishlist.create(req.body);
+    const wishlistItem = await Wishlist.create({
+      ...req.body,
+      user: req.user.userId,
+    });
 
     res.status(201).json({
       success: true,
@@ -81,16 +91,27 @@ export async function updateWishlistItem(req, res) {
       });
     }
 
-    const updatedWishlistItem = await Wishlist.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-
-    if (!updatedWishlistItem) {
+    const wishlistItem = await Wishlist.findById(id);
+    if (!wishlistItem) {
       return res.status(404).json({
         success: false,
         message: "Wishlist item not found",
       });
     }
+
+    if (wishlistItem.user.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const updates = { ...req.body };
+    delete updates.user;
+
+    const updatedWishlistItem = await Wishlist.findByIdAndUpdate(id, updates, {
+      new: true,
+    });
 
     res.status(200).json({
       success: true,
@@ -117,14 +138,22 @@ export async function deleteWishlistItem(req, res) {
       });
     }
 
-    const deletedWishlistItem = await Wishlist.findByIdAndDelete(id);
-
-    if (!deletedWishlistItem) {
+    const wishlistItem = await Wishlist.findById(id);
+    if (!wishlistItem) {
       return res.status(404).json({
         success: false,
         message: "Wishlist item not found",
       });
     }
+
+    if (wishlistItem.user.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const deletedWishlistItem = await Wishlist.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,

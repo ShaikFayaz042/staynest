@@ -1,15 +1,16 @@
 import express from "express";
-import {getWishlistItems, getWishlistItemById, updateWishlistItem, createWishlistItem, deleteWishlistItem} from "../controllers/wishlist.controller.js";
+import { getWishlistItems, getWishlistItemById, updateWishlistItem, createWishlistItem, deleteWishlistItem } from "../controllers/wishlist.controller.js";
+import { verifyJWT } from "../middlewares/verifyJWT.js";
 
 const router = express.Router();
 
 router.route("/")
-.get(getWishlistItems)
-.post(createWishlistItem);
+.get(verifyJWT, getWishlistItems)
+.post(verifyJWT, createWishlistItem);
 
 router.route("/:id")
-.get(getWishlistItemById)
-.patch(updateWishlistItem)
-.delete(deleteWishlistItem);
+.get(verifyJWT, getWishlistItemById)
+.patch(verifyJWT, updateWishlistItem)
+.delete(verifyJWT, deleteWishlistItem);
 
 export default router;

@@ -18,11 +18,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    roles: [{
-      type: String,
-      enum: ["Host", "Guest"],
-      default: "Guest",
-    }],
+    roles: {
+      type: [String],
+      enum: ["Guest", "Host", "Admin"],
+      default: ["Guest"],
+    },
     profile: {
       type: String,
       default: "",

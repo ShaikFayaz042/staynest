@@ -3,8 +3,8 @@ import Booking from "../models/Booking.js";
 
 export async function getBookings(req, res) {
   try {
-    const filter = {};
-    const { listing, user } = req.query;
+    const filter = { user: req.user.userId };
+    const { listing } = req.query;
 
     if (listing) {
       if (!mongoose.Types.ObjectId.isValid(listing)) {
@@ -14,16 +14,6 @@ export async function getBookings(req, res) {
         });
       }
       filter.listing = listing;
-    }
-
-    if (user) {
-      if (!mongoose.Types.ObjectId.isValid(user)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid user id",
-        });
-      }
-      filter.user = user;
     }
 
     const bookings = await Booking.find(filter);
@@ -61,6 +51,13 @@ export async function getBookingById(req, res) {
       });
     }
 
+    if (booking.user.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Booking fetched successfully",
@@ -77,7 +74,10 @@ export async function getBookingById(req, res) {
 
 export async function createBooking(req, res) {
   try {
-    const booking = await Booking.create(req.body);
+    const booking = await Booking.create({
+      ...req.body,
+      user: req.user.userId,
+    });
 
     res.status(201).json({
       success: true,
@@ -104,16 +104,27 @@ export async function updateBooking(req, res) {
       });
     }
 
-    const updatedBooking = await Booking.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-
-    if (!updatedBooking) {
+    const booking = await Booking.findById(id);
+    if (!booking) {
       return res.status(404).json({
         success: false,
         message: "Booking not found",
       });
     }
+
+    if (booking.user.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const updates = { ...req.body };
+    delete updates.user;
+
+    const updatedBooking = await Booking.findByIdAndUpdate(id, updates, {
+      new: true,
+    });
 
     res.status(200).json({
       success: true,
@@ -140,14 +151,22 @@ export async function deleteBooking(req, res) {
       });
     }
 
-    const deletedBooking = await Booking.findByIdAndDelete(id);
-
-    if (!deletedBooking) {
+    const booking = await Booking.findById(id);
+    if (!booking) {
       return res.status(404).json({
         success: false,
         message: "Booking not found",
       });
     }
+
+    if (booking.user.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const deletedBooking = await Booking.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,

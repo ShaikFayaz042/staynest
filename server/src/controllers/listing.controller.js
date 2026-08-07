@@ -54,7 +54,10 @@ export async function getListingById(req, res) {
 
 export async function createListing(req, res) {
   try {
-    const listing = await Listing.create(req.body);
+    const listing = await Listing.create({
+      ...req.body,
+      host: req.user.userId,
+    });
 
     res.status(201).json({
       success: true,
@@ -81,16 +84,27 @@ export async function updateListing(req, res) {
       });
     }
 
-    const updatedListing = await Listing.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-
-    if (!updatedListing) {
+    const listing = await Listing.findById(id);
+    if (!listing) {
       return res.status(404).json({
         success: false,
         message: "Listing not found",
       });
     }
+
+    if (listing.host.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const updates = { ...req.body };
+    delete updates.host;
+
+    const updatedListing = await Listing.findByIdAndUpdate(id, updates, {
+      new: true,
+    });
 
     res.status(200).json({
       success: true,
@@ -117,14 +131,22 @@ export async function deleteListing(req, res) {
       });
     }
 
-    const deletedListing = await Listing.findByIdAndDelete(id);
-
-    if (!deletedListing) {
+    const listing = await Listing.findById(id);
+    if (!listing) {
       return res.status(404).json({
         success: false,
         message: "Listing not found",
       });
     }
+
+    if (listing.host.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const deletedListing = await Listing.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,

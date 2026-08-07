@@ -67,7 +67,10 @@ export async function getReviewById(req, res) {
 
 export async function createReview(req, res) {
   try {
-    const review = await Review.create(req.body);
+    const review = await Review.create({
+      ...req.body,
+      user: req.user.userId,
+    });
 
     res.status(201).json({
       success: true,
@@ -94,16 +97,27 @@ export async function updateReview(req, res) {
       });
     }
 
-    const updatedReview = await Review.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-
-    if (!updatedReview) {
+    const review = await Review.findById(id);
+    if (!review) {
       return res.status(404).json({
         success: false,
         message: "Review not found",
       });
     }
+
+    if (review.user.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const updates = { ...req.body };
+    delete updates.user;
+
+    const updatedReview = await Review.findByIdAndUpdate(id, updates, {
+      new: true,
+    });
 
     res.status(200).json({
       success: true,
@@ -130,14 +144,22 @@ export async function deleteReview(req, res) {
       });
     }
 
-    const deletedReview = await Review.findByIdAndDelete(id);
-
-    if (!deletedReview) {
+    const review = await Review.findById(id);
+    if (!review) {
       return res.status(404).json({
         success: false,
         message: "Review not found",
       });
     }
+
+    if (review.user.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const deletedReview = await Review.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,

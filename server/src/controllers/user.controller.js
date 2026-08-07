@@ -1,9 +1,13 @@
 import mongoose from "mongoose";
 import User from "../models/User.js";
 
+function isAdminOrSelf(req, id) {
+  return req.user?.userId === id || req.user?.roles?.includes("Admin");
+}
+
 export async function getUsers(req, res) {
   try {
-    const users = await User.find();
+    const users = await User.find().select("-password");
     res.status(200).json({
       success: true,
       message: "Users fetched successfully",
@@ -29,7 +33,14 @@ export async function getUserById(req, res) {
       });
     }
 
-    const user = await User.findById(id);
+    if (!isAdminOrSelf(req, id)) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const user = await User.findById(id).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -52,32 +63,6 @@ export async function getUserById(req, res) {
   }
 }
 
-export async function createUser(req, res) {
-  try {
-    const user = await User.create(req.body);
-
-    res.status(201).json({
-      success: true,
-      message: "User created successfully",
-      data: user,
-    });
-  } catch (err) {
-    console.log("Error creating user: ", err);
-
-    if (err.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        message: "Email already exists",
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
-}
-
 export async function updateUser(req, res) {
   try {
     const { id } = req.params;
@@ -89,10 +74,20 @@ export async function updateUser(req, res) {
       });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, req.body, {
+    if (!isAdminOrSelf(req, id)) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const updates = { ...req.body };
+    delete updates.password;
+
+    const updatedUser = await User.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true,
-    });
+    }).select("-password");
 
     if (!updatedUser) {
       return res.status(404).json({
@@ -134,7 +129,14 @@ export async function deleteUser(req, res) {
       });
     }
 
-    const deletedUser = await User.findByIdAndDelete(id);
+    if (!isAdminOrSelf(req, id)) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    const deletedUser = await User.findByIdAndDelete(id).select("-password");
 
     if (!deletedUser) {
       return res.status(404).json({
