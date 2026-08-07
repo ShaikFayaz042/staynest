@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { createListing as apiCreateListing } from "../api/listings";
+import { uploadImages } from "../api/imagekit";
 import { HostNavContext } from "../components/host/HostNavContext";
 import AddressSetupStep from "../components/host/AddressSetupStep";
+import MapPinStep from "../components/host/MapPinStep";
 import StepIntro from "../components/host/StepIntro";
 import PropertyTypeStep from "../components/host/PropertyTypeStep";
 import BasicsStep from "../components/host/BasicsStep";
@@ -87,81 +90,61 @@ function getAmenitiesMap() {
   return map;
 }
 
-function createListing(data, user) {
-  const listings = JSON.parse(localStorage.getItem("listings")) || [];
-  const maxId = listings.reduce((max, l) => {
-    const num = parseInt(l.id.replace("l", ""));
-    return num > max ? num : max;
-  }, 0);
-  const newId = `l${maxId + 1}`;
-
-  // Address
+function buildListingPayload(data) {
   const addr = data.address || {};
   const location = {
     country: addr.country || "India",
     state: addr.state || "",
     city: addr.city || "",
-    address: `${addr.flat ? addr.flat + ", " : ""}${addr.street || ""}`,
-    latitude: "28.6139",
-    longitude: "77.209",
+    address: `${addr.flat ? addr.flat + ", " : ""}${addr.street || ""}`.trim(),
+    latitude: data.location?.latitude ?? parseFloat(addr.latitude) ?? 28.6139,
+    longitude: data.location?.longitude ?? parseFloat(addr.longitude) ?? 77.209,
   };
 
-  // Bedrooms – distribute total beds among bedroomsCount
   const bedroomsCount = data.bedrooms || 1;
   const totalBeds = data.beds || 1;
   let bedsPerRoom = Math.floor(totalBeds / bedroomsCount);
-  let remaining = totalBeds - (bedsPerRoom * bedroomsCount);
+  let remaining = totalBeds - bedsPerRoom * bedroomsCount;
   const bedrooms = [];
+
   for (let i = 0; i < bedroomsCount; i++) {
     let bedCount = bedsPerRoom + (remaining > 0 ? 1 : 0);
     if (remaining > 0) remaining--;
-    // Ensure at least 1 bed per bedroom if totalBeds >= bedroomsCount
     if (bedCount === 0) bedCount = 1;
     bedrooms.push({
-      id: `${newId}-b${i + 1}`,
       title: `Bedroom ${i + 1}`,
       beds: bedCount,
-      images: [
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70",
-        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70",
-      ],
+      images: [],
     });
   }
 
-  // Amenities – convert IDs to names
   const amenityMap = getAmenitiesMap();
-  const amenityNames = (data.amenities || []).map(id => amenityMap[id]).filter(Boolean);
+  const amenityNames = (data.amenities || []).map((id) => amenityMap[id]).filter(Boolean);
 
   return {
-    id: newId,
-    hostId: user ? user.id : "unknown",
     title: data.title || "Untitled",
     description: data.description || "",
     category: data.category || "House",
-    location: location,
+    location,
     pricePerNight: data.basePrice || 1827,
     guests: data.guests || 1,
-    bedroomsCount: bedroomsCount,
     beds: totalBeds,
+    bedroomsCount,
     bathrooms: data.bathrooms || 1,
-    rating: 0,
-    reviewCount: 0,
     images: [
       "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=70",
       "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=70",
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70",
     ],
-    bedrooms: bedrooms,
+    bedrooms,
     amenities: amenityNames,
-    reviewIds: [],
-    bookingIds: [],
   };
 }
 
 const PHASES = [
   { start: 0, end: 3 },
   { start: 4, end: 7 },
-  { start: 8, end: 9 },
+  { start: 8, end: 10 },
 ];
 
 function computeProgress(index) {
@@ -185,22 +168,40 @@ function isStepValid(index, formData) {
     }
     case 2:
       return Boolean(formData.category);
+    case 3: {
+      // Basics step - any valid selection
+      return true;
+    }
     case 5: {
       // Amenities step – require at least 4 selected
       const amenities = formData.amenities || [];
       return amenities.length >= 4;
     }
+    case 6: {
+      const bedroomPhotos = Array.isArray(formData.bedroomPhotos) ? formData.bedroomPhotos : [];
+      const bedrooms = Number(formData.bedrooms || 1);
+      return (
+        bedroomPhotos.length === bedrooms &&
+        bedroomPhotos.every((group) => Array.isArray(group) && group.length > 0)
+      );
+    }
     case 7:
       return Boolean(formData.title?.trim() && formData.description?.trim());
+    case 8:
+      return true;
+    case 9: {
+      const location = formData.location || {};
+      return Boolean(
+        location.latitude &&
+        location.longitude &&
+        formData.address?.street?.trim() &&
+        formData.address?.city?.trim() &&
+        formData.address?.state?.trim()
+      );
+    }
     default:
       return true;
   }
-}
-
-function saveListing(listing) {
-  const listings = JSON.parse(localStorage.getItem("listings")) || [];
-  listings.push(listing);
-  localStorage.setItem("listings", JSON.stringify(listings));
 }
 
 export default function HostWizard() {
@@ -208,6 +209,43 @@ export default function HostWizard() {
   const { user } = useAuth();
   const [index, setIndex] = useState(0);
   const [formData, setFormData] = useState({});
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishError, setPublishError] = useState("");
+
+  const handlePublish = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    setPublishError("");
+    setIsPublishing(true);
+
+    try {
+      const payload = buildListingPayload(formData);
+      const images = formData.photos?.length
+        ? await uploadImages(formData.photos, "/staynest/listings/main")
+        : payload.images;
+
+      const bedroomImages = [];
+      for (let i = 0; i < payload.bedrooms.length; i += 1) {
+        const files = Array.isArray(formData.bedroomPhotos?.[i]) ? formData.bedroomPhotos[i] : [];
+        bedroomImages.push(files.length ? await uploadImages(files, "/staynest/listings/bedrooms") : []);
+      }
+
+      const bedrooms = payload.bedrooms.map((bedroom, index) => ({
+        ...bedroom,
+        images: bedroomImages[index] || [],
+      }));
+
+      await apiCreateListing({ ...payload, images, bedrooms });
+      navigate("/host");
+    } catch (error) {
+      setPublishError(error.message || "Unable to publish listing.");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
   const steps = [
     <StepIntro
@@ -229,28 +267,26 @@ export default function HostWizard() {
     <StepIntro
       step={3}
       title="Finish up and publish"
-      description="Finally, set your pricing and publish your listing."
+      description="Finally, confirm your listing's exact location and set your pricing."
     />,
+    <MapPinStep />,
     <PricingStep />,
     // Success screen
     <div className="max-w-2xl mx-auto px-8 md:px-16 py-20 text-center">
       <div className="text-6xl mb-6">🎉</div>
       <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">Your listing is ready!</h1>
-      <p className="mt-3 text-gray-600 dark:text-gray-400">You can now view it on your dashboard.</p>
+      <p className="mt-3 text-gray-600 dark:text-gray-400">You can now publish this listing and view it on your dashboard.</p>
+      {publishError && <p className="mt-4 text-sm text-red-500">{publishError}</p>}
       <button
-        onClick={() => {
-          if (!user) {
-            alert("You must be logged in to publish a listing.");
-            navigate("/login");
-            return;
-          }
-          const newListing = createListing(formData, user);
-          saveListing(newListing);
-          navigate("/host");
-        }}
-        className="mt-8 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-lg text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-200"
+        onClick={handlePublish}
+        disabled={isPublishing}
+        className={`mt-8 px-6 py-3 rounded-lg text-sm font-semibold transition ${
+          isPublishing
+            ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+            : "bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+        }`}
       >
-        Go to Dashboard
+        {isPublishing ? "Publishing…" : "Publish listing"}
       </button>
     </div>,
   ];

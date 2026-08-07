@@ -7,6 +7,7 @@ import listingRouter from "./routes/listing.routes.js";
 import reviewRouter from "./routes/review.routes.js";
 import bookingRouter from "./routes/booking.routes.js";
 import wishlistRouter from "./routes/wishlist.routes.js";
+import imageKitRouter from "./routes/imagekit.routes.js";
 
 const app = express();
 
@@ -29,5 +30,6 @@ app.use("/api/listings", listingRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/wishlist", wishlistRouter);
+app.use("/api/imagekit", imageKitRouter);
 
 export default app;

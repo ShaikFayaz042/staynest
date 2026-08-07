@@ -8,6 +8,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import HomePage from './pages/HomePage';
 import HostPage from './pages/HostPage';
 import HostWizard from './pages/HostWizard';
+import EditListingPage from './pages/EditListingPage';
 import ListingPage from './pages/ListingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -58,6 +59,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <HostWizard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/host/listings/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditListingPage />
               </ProtectedRoute>
             }
           />

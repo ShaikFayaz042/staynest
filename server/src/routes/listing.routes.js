@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.route("/")
 .get(getListings)
-.post(verifyJWT, authorizeRoles("Host", "Admin"), createListing);
+.post(verifyJWT, createListing);
 
 router.route("/:id")
 .get(getListingById)

@@ -47,11 +47,7 @@ export default function Navbar({
 
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : null;
 
-  // Check if user has any listings
-  const userListings = user
-    ? (JSON.parse(localStorage.getItem("listings")) || []).filter(l => l.hostId === user.id)
-    : [];
-  const hasListings = userListings.length > 0;
+  const hasListings = user?.roles?.includes("Host") || false;
 
   // Determine which tab is active for sub-navs
   const path = location.pathname;

@@ -1,12 +1,86 @@
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import Footer from '../components/common/Footer';
 import Navbar from '../components/common/Navbar';
+import { deleteListing, fetchListings } from '../api/listings';
 
 export default function HostPage() {
   const { user } = useAuth();
-  const listings = JSON.parse(localStorage.getItem('listings')) || [];
-  const userListings = user ? listings.filter(l => l.hostId === user.id) : [];
+  const [userListings, setUserListings] = useState([]);
+  const [deletingId, setDeletingId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const loadHostListings = async () => {
+    if (!user) {
+      setUserListings([]);
+      return;
+    }
+
+    try {
+      const response = await fetchListings();
+      const listings = Array.isArray(response?.data) ? response.data : [];
+      const filtered = listings.filter((listing) => {
+        const hostId = String(listing.host?._id || listing.host || listing.hostId || "");
+        return hostId === String(user.id);
+      });
+      setUserListings(filtered);
+    } catch (error) {
+      console.error(error);
+      setUserListings([]);
+    }
+  };
+
+  useEffect(() => {
+    loadHostListings();
+  }, [user]);
+
+  const handleDelete = async (listingId) => {
+    setConfirmDeleteId(listingId);
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmDeleteId) return;
+
+    setDeletingId(confirmDeleteId);
+    setErrorMessage('');
+
+    try {
+      await deleteListing(confirmDeleteId);
+      await loadHostListings();
+      setConfirmDeleteId(null);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error.message || 'Failed to delete listing.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  useEffect(() => {
+    async function loadHostListings() {
+      if (!user) {
+        setUserListings([]);
+        return;
+      }
+
+      try {
+        const response = await fetchListings();
+        const listings = Array.isArray(response?.data) ? response.data : [];
+        const filtered = listings.filter((listing) => {
+          const hostId = String(listing.host?._id || listing.host || listing.hostId || "");
+          return hostId === String(user.id);
+        });
+        setUserListings(filtered);
+      } catch (error) {
+        console.error(error);
+        setUserListings([]);
+      }
+    }
+
+    loadHostListings();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900" style={{ fontFamily: 'Nunito, sans-serif' }}>
@@ -26,6 +100,12 @@ export default function HostPage() {
 
         {user ? (
           <>
+            {errorMessage ? (
+              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {errorMessage}
+              </div>
+            ) : null}
+
             <div className="mt-4">
               <p className="text-lg font-semibold text-gray-900 dark:text-white">Welcome, {user.name || user.email}!</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -48,6 +128,22 @@ export default function HostPage() {
                       <div className="font-semibold text-gray-900 dark:text-white">{listing.title}</div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">{listing.category} · {listing.location.city}</div>
                       <div className="text-sm font-bold mt-1 text-gray-900 dark:text-white">₹{listing.pricePerNight} / night</div>
+                      <div className="mt-4 flex gap-2">
+                        <Link
+                          to={`/host/listings/${listing._id || listing.id}/edit`}
+                          className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(listing._id || listing.id)}
+                          disabled={deletingId === (listing._id || listing.id)}
+                          className="flex-1 rounded-lg bg-[#FF385C] px-3 py-2 text-center text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
+                        >
+                          {deletingId === (listing._id || listing.id) ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -71,6 +167,34 @@ export default function HostPage() {
           </div>
         )}
       </main>
+
+      {confirmDeleteId ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Delete listing?</h3>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              This action cannot be undone. The listing will be removed from your host dashboard.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteId(null)}
+                className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="rounded-full bg-[#FF385C] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <Footer />
     </div>
   );

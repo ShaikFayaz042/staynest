@@ -6,8 +6,8 @@ const locationSchema = new mongoose.Schema(
     state: { type: String, required: true },
     city: { type: String, required: true },
     address: { type: String, required: true },
-    latitude: { type: String },
-    longitude: { type: String },
+    latitude: { type: Number },
+    longitude: { type: Number },
   },
   { _id: false } 
 );

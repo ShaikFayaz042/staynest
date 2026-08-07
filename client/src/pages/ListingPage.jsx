@@ -59,7 +59,7 @@ export default function ListingPage() {
         </div>
         <RatingSummary listingId={listing._id || listing.id} />
         <ReviewSection listingId={listing._id || listing.id} />
-        <MapSection />
+        <MapSection location={listing.location} />
         <HostSection hostId={
           typeof listing.host === "object"
             ? listing.host._id || listing.host.id
