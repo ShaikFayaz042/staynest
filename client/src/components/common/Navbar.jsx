@@ -35,8 +35,8 @@ export default function Navbar({
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/");
     setIsProfileMenuOpen(false);
   };

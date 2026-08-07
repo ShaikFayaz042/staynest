@@ -29,14 +29,15 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const success = login(email, password);
-    if (success) {
+
+    const result = await login(email, password);
+    if (result.success) {
       navigate('/');
     } else {
-      setError('Invalid email or password');
+      setError(result.message || 'Invalid email or password');
     }
   };
 

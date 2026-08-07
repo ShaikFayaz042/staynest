@@ -66,18 +66,19 @@ export default function SignupPage() {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     if (!form.name.trim()) return setError("Name is required.");
     if (!form.email.trim()) return setError("Email is required.");
     if (form.password.length < 6) return setError("Password must be at least 6 characters.");
     if (form.password !== form.confirm) return setError("Passwords do not match.");
-    const result = signup(form.name.trim(), form.email.trim(), form.password);
+
+    const result = await signup(form.name.trim(), form.email.trim(), form.password);
     if (result.success) {
       navigate("/");
     } else {
-      setError(result.message);
+      setError(result.message || "Unable to create account.");
     }
   };
 

@@ -13,8 +13,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ProfileSetupPage from './pages/ProfileSetupPage';
 import MyTripsPage from './pages/MyTripsPage';
-import WishlistsPage from './pages/WishlistsPage';
-
+import WishlistsPage from './pages/WishlistsPage';import ProtectedRoute from './components/common/ProtectedRoute';
 // Data
 import amenities from './data/amenities';
 import bookings from "./data/bookings";
@@ -51,9 +50,30 @@ function App() {
           <Route path="/listing/:id" element={<ListingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/profile" element={<ProfileSetupPage />} />
-          <Route path="/trips" element={<MyTripsPage />} />
-          <Route path="/wishlists" element={<WishlistsPage />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfileSetupPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/trips"
+            element={
+              <ProtectedRoute>
+                <MyTripsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wishlists"
+            element={
+              <ProtectedRoute>
+                <WishlistsPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </AuthProvider>
     </ThemeProvider>

@@ -10,12 +10,21 @@ export default function ProfileSetupPage() {
   const [photo, setPhoto] = useState(user?.profilePhoto || "");
   const [message, setMessage] = useState("");
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!user) return;
-    const updates = { name, about, profilePhoto: photo };
-    updateUser(updates);
-    setMessage("Profile updated successfully!");
-    setTimeout(() => setMessage(""), 3000);
+
+    const result = await updateUser({
+      name,
+      bio: about,
+      profile: photo,
+    });
+
+    if (result.success) {
+      setMessage("Profile updated successfully!");
+      setTimeout(() => setMessage(""), 3000);
+    } else {
+      setMessage(result.message || "Unable to update profile.");
+    }
   };
 
   return (

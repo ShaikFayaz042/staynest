@@ -2,85 +2,121 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+function normalizeUser(data) {
+  if (!data) return null;
+
+  return {
+    ...data,
+    id: data.id || data._id,
+    profilePhoto: data.profilePhoto || data.profile || '',
+    about: data.about || data.bio || '',
+  };
+}
+
+async function authRequest(path, options = {}) {
+  const response = await fetch(`/api${path}`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+    ...options,
+  });
+
+  const contentType = response.headers.get('content-type') || '';
+  let payload = null;
+
+  if (contentType.includes('application/json')) {
+    payload = await response.json();
+  } else {
+    payload = await response.text();
+  }
+
+  if (!response.ok) {
+    throw new Error(payload?.message || 'Request failed');
+  }
+
+  return payload;
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount (same as before)
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    async function bootstrapAuth() {
       try {
-        const parsed = JSON.parse(storedUser);
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const found = users.find(u => u.id === parsed.id);
-        if (found) {
-          setUser(found);
-        } else {
-          localStorage.removeItem('user');
-        }
+        const response = await authRequest('/auth/me');
+        setUser(normalizeUser(response?.data || null));
       } catch {
-        localStorage.removeItem('user');
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
     }
+
+    bootstrapAuth();
   }, []);
 
-  const login = (email, password) => {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const foundUser = users.find(u => u.email === email && u.password === password);
-    if (foundUser) {
-      setUser(foundUser);
-      localStorage.setItem('user', JSON.stringify(foundUser));
-      return true;
+  const login = async (email, password) => {
+    try {
+      const response = await authRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+
+      setUser(normalizeUser(response?.data || null));
+      return { success: true, data: response?.data || null };
+    } catch (error) {
+      return { success: false, message: error.message };
     }
-    return false;
   };
 
-  const signup = (name, email, password) => {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    if (users.find(u => u.email === email)) {
-      return { success: false, message: 'User already exists with this email.' };
+  const signup = async (name, email, password) => {
+    try {
+      const response = await authRequest('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      setUser(normalizeUser(response?.data || null));
+      return { success: true, data: response?.data || null };
+    } catch (error) {
+      return { success: false, message: error.message };
     }
-    const maxId = users.reduce((max, u) => {
-      const num = parseInt(u.id.replace('u', ''));
-      return num > max ? num : max;
-    }, 0);
-    const newUser = {
-      id: `u${maxId + 1}`,
-      name,
-      email,
-      password,
-      profilePhoto: '',
-      about: '',
-      createdAt: new Date().toISOString(),
-    };
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-    setUser(newUser);
-    localStorage.setItem('user', JSON.stringify(newUser));
-    return { success: true };
   };
 
-  // ✅ NEW: Update user in context and localStorage
-  const updateUser = (updatedData) => {
-    if (!user) return;
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const index = users.findIndex(u => u.id === user.id);
-    if (index !== -1) {
-      const updatedUser = { ...users[index], ...updatedData };
-      users[index] = updatedUser;
-      localStorage.setItem('users', JSON.stringify(users));
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+  const updateUser = async (updatedData) => {
+    if (!user?.id) {
+      return { success: false, message: 'Not authenticated' };
+    }
+
+    try {
+      const response = await authRequest(`/users/${user.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updatedData),
+      });
+
+      const updatedUser = normalizeUser(response?.data || null);
       setUser(updatedUser);
+      return { success: true, data: updatedUser };
+    } catch (error) {
+      return { success: false, message: error.message };
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authRequest('/auth/logout', { method: 'POST' });
+    } catch {
+      // Ignore logout failures and clear client state anyway
+    }
+
     setUser(null);
-    localStorage.removeItem('user');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, updateUser, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, updateUser, logout }}>
       {children}
     </AuthContext.Provider>
   );
