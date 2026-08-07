@@ -45,8 +45,22 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/host" element={<HostPage />} />
-          <Route path="/host/create" element={<HostWizard />} />
+          <Route
+            path="/host"
+            element={
+              <ProtectedRoute>
+                <HostPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/host/create"
+            element={
+              <ProtectedRoute>
+                <HostWizard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/listing/:id" element={<ListingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
