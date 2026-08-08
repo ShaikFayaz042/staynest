@@ -9,6 +9,7 @@ const introVideo = "/videos/intro.mp4";
 export default function HomePage() {
   const [showIntroOverlay, setShowIntroOverlay] = useState(false);
   const [activeFilters, setActiveFilters] = useState(defaultFilters);
+  const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -30,13 +31,22 @@ export default function HomePage() {
 
   useEffect(() => {
     if (showIntroOverlay && videoRef.current) {
+      videoRef.current.muted = isMuted;
       videoRef.current.play().catch(() => {});
     }
-  }, [showIntroOverlay]);
+  }, [showIntroOverlay, isMuted]);
 
   const dismissIntro = () => {
     window.localStorage.setItem("intro_video_seen", "true");
     setShowIntroOverlay(false);
+  };
+
+  const enableSound = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      setIsMuted(false);
+      videoRef.current.play().catch(() => {});
+    }
   };
 
   return (
@@ -48,6 +58,7 @@ export default function HomePage() {
               ref={videoRef}
               src={introVideo}
               autoPlay
+              muted={isMuted}
               playsInline
               onEnded={dismissIntro}
               className="h-auto max-h-[80vh] w-full object-contain"
@@ -58,6 +69,14 @@ export default function HomePage() {
             >
               Skip
             </button>
+            {isMuted && (
+              <button
+                onClick={enableSound}
+                className="absolute left-4 top-4 rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-white"
+              >
+                Click to play with sound
+              </button>
+            )}
           </div>
         </div>
       )}
