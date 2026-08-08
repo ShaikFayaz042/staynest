@@ -1,7 +1,9 @@
 // components/ListingReviews.jsx
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from '../../context/ToastContext';
 import ReviewCard from "./ReviewCard";
+
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -286,6 +288,9 @@ export default function ListingReviews({ listingId }) {
   const { user } = useAuth();
   const [reviews, setReviews] = useState([]);
 
+  const ratingContainerRef = useRef(null);
+  const [shouldAnimateRating, setShouldAnimateRating] = useState(false);
+
   // Review form state
   const [rating, setRating] = useState(5);
   const [categories, setCategories] = useState({
@@ -349,6 +354,29 @@ export default function ListingReviews({ listingId }) {
     return () => controller.abort();
   }, [listingId]);
 
+  // Observe rating area and trigger animation only when scrolled into view
+  useEffect(() => {
+    if (shouldAnimateRating) return; // already triggered
+    const el = ratingContainerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const e = entries[0];
+        if (e && e.isIntersecting) {
+          setShouldAnimateRating(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [shouldAnimateRating]);
+
+  const { showToast } = useToast();
+
   // Submit review
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -356,11 +384,11 @@ export default function ListingReviews({ listingId }) {
     setSuccess("");
 
     if (!user) {
-      setMessage("Please log in to submit a review.");
+      showToast({ message: 'Please log in to submit a review.', type: 'error' });
       return;
     }
     if (!comment.trim()) {
-      setMessage("Please write a review before submitting.");
+      showToast({ message: 'Please write a review before submitting.', type: 'error' });
       return;
     }
 
@@ -389,7 +417,7 @@ export default function ListingReviews({ listingId }) {
         },
       };
       setReviews((prev) => [newReview, ...prev]);
-      setSuccess("Review submitted successfully.");
+      showToast({ message: 'Review submitted successfully.', type: 'success' });
       setComment("");
       setRating(5);
       setCategories({
@@ -403,7 +431,7 @@ export default function ListingReviews({ listingId }) {
       setMessage("");
     } catch (err) {
       console.error(err);
-      setMessage(err.message || "Unable to submit review. Please try again.");
+      showToast({ message: err.message || 'Unable to submit review. Please try again.', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -520,24 +548,24 @@ export default function ListingReviews({ listingId }) {
                 {loading ? "Submitting..." : "Submit review"}
               </button>
 
-              {(message || success) && (
-                <p
-                  className={`text-sm ${
-                    success
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-500 dark:text-red-400"
-                  }`}
-                >
-                  {success || message}
-                </p>
-              )}
+              
             </form>
           </div>
 
           {/* Right column: rating summary */}
           <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800 flex flex-col">
-            <div className="flex flex-col items-center">
-              <AnimatedRating targetRating={overallRating} />
+            <div className="flex flex-col items-center" ref={ratingContainerRef}>
+                {shouldAnimateRating ? (
+                  <AnimatedRating targetRating={overallRating} />
+                ) : (
+                  <div className="rs-rating-wrapper">
+                    <Laurel />
+                    <div className="rs-number-container">
+                      <h1 className="rs-rating-number">{totalReviews > 0 ? overallRating.toFixed(1) : "—"}</h1>
+                    </div>
+                    <Laurel mirror />
+                  </div>
+                )}
               <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 sm:text-base">
                 {totalReviews > 0 ? "Guest favourite" : "No reviews yet"}
               </p>

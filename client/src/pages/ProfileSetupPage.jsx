@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/common/Navbar";
+import { uploadImages, deleteImage } from "../api/imagekit";
+import { useToast } from "../context/ToastContext";
 
 export default function ProfileSetupPage() {
   const { user, updateUser } = useAuth();
@@ -8,7 +10,11 @@ export default function ProfileSetupPage() {
   const [name, setName] = useState(user?.name || "");
   const [about, setAbout] = useState(user?.about || "");
   const [photo, setPhoto] = useState(user?.profilePhoto || "");
-  const [message, setMessage] = useState("");
+  const [phone, setPhone] = useState(user?.phone || "");
+  const [address, setAddress] = useState(user?.address || "");
+  
+  const [uploading, setUploading] = useState(false);
+  const { showToast } = useToast();
 
   const handleSave = async () => {
     if (!user) return;
@@ -17,13 +23,14 @@ export default function ProfileSetupPage() {
       name,
       bio: about,
       profile: photo,
+      phone,
+      address,
     });
 
     if (result.success) {
-      setMessage("Profile updated successfully!");
-      setTimeout(() => setMessage(""), 3000);
+      showToast({ message: 'Profile updated successfully!', type: 'success' });
     } else {
-      setMessage(result.message || "Unable to update profile.");
+      showToast({ message: result.message || "Unable to update profile.", type: 'error' });
     }
   };
 
@@ -34,24 +41,56 @@ export default function ProfileSetupPage() {
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Profile Settings</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">Update your personal information</p>
 
-        {message && (
-          <div className="mt-4 p-3 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded-lg">{message}</div>
-        )}
+        
 
         <div className="mt-8 space-y-6">
           {/* Profile Photo */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1">Profile Photo URL</label>
-            <input
-              type="text"
-              value={photo}
-              onChange={(e) => setPhoto(e.target.value)}
-              placeholder="https://example.com/photo.jpg"
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            />
-            {photo && (
-              <img src={photo} alt="Profile" className="mt-3 w-24 h-24 rounded-full object-cover" />
-            )}
+            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1">Profile Photo</label>
+
+            <div className="flex items-center gap-4">
+              <label className="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-200">
+                {uploading ? "Uploading..." : "Choose Photo"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploading(true);
+                    try {
+                      const urls = await uploadImages([file], "/staynest/profile");
+                      if (urls && urls.length) setPhoto(urls[0]);
+                    } catch (err) {
+                      console.error("Upload failed", err);
+                      showToast({ message: 'Image upload failed', type: 'error' });
+                    } finally {
+                      setUploading(false);
+                    }
+                  }}
+                  className="hidden"
+                />
+              </label>
+
+              {photo && (
+                <div className="flex items-center gap-3">
+                  <img src={photo} alt="Profile" className="mt-3 w-24 h-24 rounded-full object-cover" />
+                  <button
+                    onClick={async () => {
+                      try {
+                        await deleteImage(photo);
+                      } catch (err) {
+                        console.error("Failed to delete image", err);
+                      }
+                      setPhoto("");
+                    }}
+                    className="px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 rounded-md text-sm"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Name */}
@@ -83,6 +122,31 @@ export default function ProfileSetupPage() {
           >
             Save Changes
           </button>
+
+          {/* Additional details: phone + address */}
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1">Phone</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="(555) 555-5555"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1">Location / Address</label>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="City, Country or full address"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              />
+            </div>
+          </div>
 
           <hr className="my-8 border-gray-200 dark:border-gray-700" />
 

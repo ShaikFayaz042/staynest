@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useToast } from '../../context/ToastContext';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -22,6 +23,7 @@ export default function BookingCard({ list }) {
   const [guests, setGuests] = useState(1);
   const [message, setMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const { showToast } = useToast();
   const [bookings, setBookings] = useState([]);
 
   const nights = checkIn && checkOut ? Math.max(0, Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24))) : 0;
@@ -122,23 +124,22 @@ export default function BookingCard({ list }) {
 
   const handleReserve = async () => {
     if (!user) {
-      setMessage("Please log in to book this listing.");
-      setTimeout(() => setMessage(""), 4000);
+      showToast({ message: 'Please log in to book this listing.', type: 'error' });
       return;
     }
     if (!checkIn || !checkOut) {
-      setMessage("Please select check-in and check-out dates.");
+      showToast({ message: 'Please select check-in and check-out dates.', type: 'error' });
       return;
     }
     if (nights <= 0) {
-      setMessage("Check-out must be after check-in.");
+      showToast({ message: 'Check-out must be after check-in.', type: 'error' });
       return;
     }
 
     if (conflictingBooking) {
-      setMessage(user && String(conflictingBooking.user || conflictingBooking.userId || "") === String(user.id)
+      showToast({ message: user && String(conflictingBooking.user || conflictingBooking.userId || "") === String(user.id)
         ? `You already have a reservation for ${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}.`
-        : `These dates are already reserved for this listing (${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}).`);
+        : `These dates are already reserved for this listing (${conflictingBooking.checkIn} to ${conflictingBooking.checkOut}).`, type: 'error' });
       return;
     }
 
@@ -163,17 +164,14 @@ export default function BookingCard({ list }) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create booking");
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload?.message || "Failed to create booking");
       }
 
       const data = await response.json();
       const createdBooking = data?.data;
-      if (createdBooking) {
-        setBookings((prev) => [...prev, createdBooking]);
-      }
-
-      setSuccessMessage("Booking confirmed! Redirecting to your trips...");
-      setMessage("");
+      if (createdBooking) setBookings((prev) => [...prev, createdBooking]);
+      showToast({ message: 'Booking confirmed! Redirecting to your trips...', type: 'success' });
       setCheckIn("");
       setCheckOut("");
       setGuests(1);
@@ -183,8 +181,7 @@ export default function BookingCard({ list }) {
       }, 1200);
     } catch (err) {
       console.error(err);
-      setMessage("Unable to confirm booking. Please try again.");
-      setTimeout(() => setMessage(""), 4000);
+      showToast({ message: err.message || 'Unable to confirm booking. Please try again.', type: 'error' });
     }
   };
 
@@ -313,10 +310,8 @@ export default function BookingCard({ list }) {
         </button>
         <p className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">You won't be charged yet</p>
 
-        {(availabilityMessage || message || successMessage) && (
-          <div className={`mt-3 text-sm text-center ${successMessage ? "text-green-600 dark:text-green-400" : message?.includes("confirmed") ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}>
-            {successMessage || message || availabilityMessage}
-          </div>
+        {availabilityMessage && (
+          <div className="mt-3 text-sm text-center text-red-500 dark:text-red-400">{availabilityMessage}</div>
         )}
       </div>
     </aside>

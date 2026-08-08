@@ -1,9 +1,31 @@
 import mongoose from "mongoose";
 import Listing from "../models/Listing.js";
+import User from "../models/User.js";
 
 export async function getListings(req, res) {
   try {
-    const listings = await Listing.find();
+    // Include booking counts and next upcoming booking for host dashboard
+    const listings = await Listing.aggregate([
+      {
+        $lookup: {
+          from: 'bookings',
+          let: { listingId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $and: [ { $eq: ['$listing', '$$listingId'] }, { $ne: ['$status', 'cancelled'] } ] } } },
+            { $sort: { checkIn: 1 } },
+            { $project: { _id: 1, checkIn: 1, checkOut: 1, user: 1, status: 1 } }
+          ],
+          as: 'activeBookings'
+        }
+      },
+      {
+        $addFields: {
+          bookingCount: { $size: '$activeBookings' },
+          nextBooking: { $arrayElemAt: ['$activeBookings', 0] }
+        }
+      }
+    ]);
+
     res.status(200).json({
       success: true,
       message: "Listings fetched successfully",
@@ -58,6 +80,12 @@ export async function createListing(req, res) {
       ...req.body,
       host: req.user.userId,
     });
+
+    await User.findByIdAndUpdate(
+      req.user.userId,
+      { $addToSet: { roles: "Host" } },
+      { new: true }
+    );
 
     res.status(201).json({
       success: true,

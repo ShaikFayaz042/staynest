@@ -5,7 +5,8 @@ export async function getBookings(req, res) {
   try {
     const { listing } = req.query;
     const filter = {};
-
+    // If ?listing=... is provided, return bookings for that listing.
+    // If ?owner=true is provided, return bookings for listings owned by the authenticated user (host view).
     if (listing) {
       if (!mongoose.Types.ObjectId.isValid(listing)) {
         return res.status(400).json({
@@ -14,7 +15,14 @@ export async function getBookings(req, res) {
         });
       }
       filter.listing = listing;
+    } else if (req.query.owner === 'true') {
+      // fetch bookings for all listings owned by this user
+      const Listing = (await import("../models/Listing.js")).default;
+      const owned = await Listing.find({ host: req.user.userId }).select('_id');
+      const ids = owned.map(l => l._id);
+      filter.listing = { $in: ids };
     } else {
+      // default: bookings for the authenticated user
       filter.user = req.user.userId;
     }
 
@@ -96,30 +104,57 @@ export async function createBooking(req, res) {
       });
     }
 
-    const conflict = await Booking.findOne({
-      listing,
-      status: { $ne: "cancelled" },
-      checkIn: { $lt: endDate },
-      checkOut: { $gt: startDate },
-    });
-
-    if (conflict) {
-      return res.status(409).json({
-        success: false,
-        message: "Selected dates are no longer available",
-      });
+    // Prevent hosts from booking their own listing
+    const Listing = (await import("../models/Listing.js")).default;
+    const listingDoc = await Listing.findById(listing).select("host");
+    if (!listingDoc) {
+      return res.status(404).json({ success: false, message: "Listing not found" });
     }
 
-    const booking = await Booking.create({
-      ...req.body,
-      user: req.user.userId,
-    });
+    if (listingDoc.host.toString() === req.user.userId) {
+      return res.status(403).json({ success: false, message: "Hosts cannot book their own listings" });
+    }
 
-    res.status(201).json({
-      success: true,
-      message: "Booking created successfully",
-      data: booking,
-    });
+    // Use a transaction to reduce race conditions for overlapping bookings
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const conflict = await Booking.findOne({
+        listing,
+        status: { $ne: "cancelled" },
+        checkIn: { $lt: endDate },
+        checkOut: { $gt: startDate },
+      }).session(session);
+
+      if (conflict) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(409).json({
+          success: false,
+          message: "Selected dates are no longer available",
+        });
+      }
+
+      const booking = await Booking.create([
+        {
+          ...req.body,
+          user: req.user.userId,
+        },
+      ], { session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(201).json({
+        success: true,
+        message: "Booking created successfully",
+        data: booking[0],
+      });
+    } catch (txErr) {
+      await session.abortTransaction();
+      session.endSession();
+      throw txErr;
+    }
   } catch (err) {
     console.log("Error creating booking: ", err);
     res.status(500).json({

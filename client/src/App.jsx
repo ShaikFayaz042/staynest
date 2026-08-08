@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { ToastProvider } from './context/ToastContext';
+import ToastContainer from './components/common/ToastContainer';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -24,7 +26,8 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Routes>
+        <ToastProvider>
+          <Routes>
           <Route path="/" element={<HomePage />} />
           <Route
             path="/host"
@@ -93,7 +96,9 @@ function App() {
               </ProtectedRoute>
             }
           />
-        </Routes>
+          </Routes>
+          <ToastContainer />
+        </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import Footer from '../components/common/Footer';
 import Navbar from '../components/common/Navbar';
 import { deleteListing, fetchListings } from '../api/listings';
@@ -10,7 +11,7 @@ export default function HostListingsPage() {
   const [userListings, setUserListings] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
+  const { showToast } = useToast();
 
   const loadHostListings = async () => {
     if (!user) {
@@ -44,7 +45,7 @@ export default function HostListingsPage() {
     if (!confirmDeleteId) return;
 
     setDeletingId(confirmDeleteId);
-    setErrorMessage('');
+    
 
     try {
       await deleteListing(confirmDeleteId);
@@ -52,7 +53,7 @@ export default function HostListingsPage() {
       setConfirmDeleteId(null);
     } catch (error) {
       console.error(error);
-      setErrorMessage(error.message || 'Failed to delete listing.');
+      showToast({ message: error.message || 'Failed to delete listing.', type: 'error' });
     } finally {
       setDeletingId(null);
     }
@@ -110,11 +111,11 @@ export default function HostListingsPage() {
                       <div className="mt-4 grid gap-3">
                         <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900">
                           <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Bookings</div>
-                          <div className="mt-2 text-lg font-semibold text-gray-900 dark:text-white">{Array.isArray(listing.bookingIds) ? listing.bookingIds.length : 0}</div>
+                          <div className="mt-2 text-lg font-semibold text-gray-900 dark:text-white">{typeof listing.bookingCount === 'number' ? listing.bookingCount : 0}</div>
                         </div>
                         <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900">
                           <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Next booking</div>
-                          <div className="mt-2 text-sm text-gray-900 dark:text-white">{listing.bookingIds?.length > 0 ? 'View calendar' : 'No bookings yet'}</div>
+                          <div className="mt-2 text-sm text-gray-900 dark:text-white">{listing.nextBooking ? new Date(listing.nextBooking.checkIn).toLocaleDateString() : 'No bookings yet'}</div>
                         </div>
                       </div>
                       <div className="mt-4 flex gap-2">

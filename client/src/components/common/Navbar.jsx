@@ -47,7 +47,11 @@ export default function Navbar({
 
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : null;
 
-  const hasListings = user?.roles?.includes("Host") || false;
+  const hasListings = Boolean(
+    user && (
+      // roles array containing 'host' (case-insensitive)
+      Array.isArray(user.roles) && user.roles.some((r) => String(r).toLowerCase().includes("host")))
+  );
 
   // Determine which tab is active for sub-navs
   const path = location.pathname;
@@ -72,212 +76,167 @@ export default function Navbar({
 
   return (
     <div className="relative w-full">
-      <nav className="w-full h-16 md:h-20 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 sticky top-0 z-50">
+      <nav className="w-full h-16 md:h-20 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 sticky top-0 z-150">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-10">
           {/* 1. Logo Section */}
           <div
             className={`flex items-center gap-2 cursor-pointer shrink-0 ${mobileSearchActive ? 'hidden' : 'flex'}`}
             onClick={() => navigate("/")}
           >
-          <StayNestLogo width={30} height={34} />
-          <span className="text-base md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Stay<span className="text-[#FF385C]">Nest</span>
-          </span>
-        </div>
+            <StayNestLogo width={30} height={34} />
+            <span className="text-base md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              Stay<span className="text-[#FF385C]">Nest</span>
+            </span>
+          </div>
 
-        {/* 2. Center Section (Search Bar or Tabs based on variant) */}
-        <div className="flex-1 flex justify-center">
-          {variant === "default" && !hideSearch && (
-            <SearchBar onMobileActiveChange={setMobileSearchActive} />
-          )}
+          {/* 2. Center Section (Search Bar or Tabs based on variant) */}
+          <div className="flex-1 flex justify-center">
+            {variant === "default" && !hideSearch && (
+              <SearchBar onMobileActiveChange={setMobileSearchActive} />
+            )}
 
-          {variant === "host-dashboard" && (
-            <div className="flex items-center gap-6">
-              {hostTabs.map((tab) => {
-                const isActive = path === tab.path;
+            {variant === "host-dashboard" && (
+              <div className="flex items-center gap-6">
+                {hostTabs.map((tab) => {
+                  const isActive = path === tab.path;
 
-                return (
+                  return (
+                    <button
+                      key={tab.label}
+                      onClick={() => tab.path && navigate(tab.path)}
+                      className={`text-sm font-medium pb-1 border-b-2 transition-colors mt-1 ${
+                        isActive
+                          ? "border-black dark:border-white text-black dark:text-white"
+                          : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {variant === "profile" && (
+              <div className="flex items-center gap-6">
+                {profileTabs.map((tab) => (
                   <button
-                    key={tab.label}
-                    onClick={() => tab.path && navigate(tab.path)}
+                    key={tab.path}
+                    onClick={() => navigate(tab.path)}
                     className={`text-sm font-medium pb-1 border-b-2 transition-colors mt-1 ${
-                      isActive
+                      path === tab.path
                         ? "border-black dark:border-white text-black dark:text-white"
                         : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600"
                     }`}
                   >
                     {tab.label}
                   </button>
-                );
-              })}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
-          {variant === "profile" && (
-            <div className="flex items-center gap-6">
-              {profileTabs.map((tab) => (
-                <button
-                  key={tab.path}
-                  onClick={() => navigate(tab.path)}
-                  className={`text-sm font-medium pb-1 border-b-2 transition-colors mt-1 ${
-                    path === tab.path
-                      ? "border-black dark:border-white text-black dark:text-white"
-                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {variant === "auth" && <div />} {/* empty center */}
-        </div>
+            {variant === "auth" && <div />} {/* empty center */}
+          </div>
 
           {/* 3. Right Side Options */}
           <div className={`items-center gap-3 shrink-0 ${mobileSearchActive ? 'hidden' : 'flex'}`}>
             {/* Dark Mode Toggle (desktop only) */}
-          <div className="hidden md:block">
-            <ThemeToggle />
-          </div>
-
-          {/* Mobile-only toggle for auth pages */}
-          {variant === 'auth' && (
-            <div className="block md:hidden mr-2">
+            <div className="hidden md:block">
               <ThemeToggle />
             </div>
-          )}
 
-          {/* Wide-screen actions for logged-in users only */}
-          {user && (variant === "default" || variant === "host-dashboard") && (
-            <button
-              onClick={handleSwitch}
-              className="text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-full transition-colors hidden lg:block"
-            >
-              {switchLabel}
-            </button>
-          )}
+            {/* Mobile-only toggle for auth pages */}
+            {variant === 'auth' && (
+              <div className="block md:hidden mr-2">
+                <ThemeToggle />
+              </div>
+            )}
 
-          {!user && (variant === "default" || variant === "host-dashboard") && (
-            <span className="hidden lg:block text-sm font-medium text-gray-800 dark:text-gray-200 px-3 py-2">
-              Nest Your Home
-            </span>
-          )}
-
-          {/* Profile circle - show only if logged in and not in auth variant */}
-          {user && variant !== "auth" && (
-            <button
-              onClick={handleProfileToggle}
-              className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-100 font-semibold flex items-center justify-center hover:ring-2 hover:ring-rose-200 dark:hover:ring-rose-500/50 transition overflow-hidden"
-            >
-              {user.profilePhoto ? (
-                <img
-                  src={user.profilePhoto}
-                  alt={user.name || "User"}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                userInitial
-              )}
-            </button>
-          )}
-
-          {/* Hamburger with dropdown - show only if not in auth variant */}
-          <div className="relative" ref={profileMenuRef}>
-            {/* Show a hamburger-style circle button when no user is logged in */}
-            {!user && variant !== 'auth' && (
+            {/* Wide-screen actions for logged-in users only */}
+            {user && (variant === "default" || variant === "host-dashboard") && (
               <button
-                onClick={handleProfileToggle}
-                aria-label="Open menu"
-                className="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                onClick={handleSwitch}
+                className="text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-full transition-colors hidden lg:block"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-800 dark:text-gray-200">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
-                </svg>
+                {switchLabel}
               </button>
             )}
 
-            {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-3 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 py-3 z-50 overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                  <span className="block text-sm font-semibold text-gray-900 dark:text-white">Account</span>
-                  <span className="block text-xs text-gray-500 dark:text-gray-400">Manage your settings</span>
-                </div>
-                <div className="h-px bg-gray-100 dark:bg-gray-700 my-2 hidden md:block" />
-                {user && (variant === "default" || variant === "host-dashboard" || variant === "profile") && (
-                  <>
-                    {(["/trips", "/wishlists", "/profile", "/listing"].includes(path) || path.startsWith("/listing/")) && (
-                      <ProfileMenuItem
-                        icon="home"
-                        label="Home"
-                        onClick={() => { navigate("/"); setIsProfileMenuOpen(false); }}
-                      />
-                    )}
-                    <ProfileMenuItem
-                      icon="airbnb"
-                      label={switchLabel}
-                      onClick={() => { handleSwitch(); setIsProfileMenuOpen(false); }}
-                    />
-                    {!hasListings && (
-                      <ProfileMenuItem
-                        icon="home"
-                        label="Become a Host"
-                        onClick={() => { navigate("/host/create"); setIsProfileMenuOpen(false); }}
-                      />
-                    )}
-                    <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
-                  </>
+            {!user && (variant === "default" || variant === "host-dashboard") && (
+              <span className="hidden lg:block text-sm font-medium text-gray-800 dark:text-gray-200 px-3 py-2">
+                Nest Your Home
+              </span>
+            )}
+
+            {/* Profile circle - clicking navigates to profile */}
+            {user && variant !== "auth" && (
+              <button
+                onClick={() => { navigate('/profile'); setIsProfileMenuOpen(false); }}
+                className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-100 font-semibold flex items-center justify-center hover:ring-2 hover:ring-rose-200 dark:hover:ring-rose-500/50 transition overflow-hidden"
+              >
+                {user.profilePhoto ? (
+                  <img
+                    src={user.profilePhoto}
+                    alt={user.name || "User"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  userInitial
                 )}
-                  {user ? (
-                    <>
-                      <ProfileMenuItem
-                        icon="heart"
-                        label="Wishlists"
-                        onClick={() => { navigate("/wishlists"); setIsProfileMenuOpen(false); }}
-                      />
-                      <ProfileMenuItem
-                        icon="airbnb"
-                        label="Trips"
-                        onClick={() => { navigate("/trips"); setIsProfileMenuOpen(false); }}
-                      />
-                      <ProfileMenuItem
-                        icon="profile"
-                        label="Profile"
-                        onClick={() => { navigate("/profile"); setIsProfileMenuOpen(false); }}
-                      />
+              </button>
+            )}
 
-                      {!hasListings && (
-                        <>
-                          <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
-                          <ProfileMenuItem
-                            icon="home"
-                            label="Become a Host"
-                            onClick={() => { navigate("/host/create"); setIsProfileMenuOpen(false); }}
-                          />
-                        </>
-                      )}
+            {/* Menu toggle + dropdown */}
+            <div className="relative" ref={profileMenuRef}>
+              {variant !== 'auth' && (
+                <button
+                  onClick={() => setIsProfileMenuOpen((p) => !p)}
+                  aria-label="Open menu"
+                  className="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-800 dark:text-gray-200">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+                  </svg>
+                </button>
+              )}
 
-                      <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
-                      <ProfileMenuItem
-                        icon="logout"
-                        label="Log out"
-                        onClick={handleLogout}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <ProfileMenuItem
-                        icon="login"
-                        label="Log in"
-                        onClick={() => { navigate("/login"); setIsProfileMenuOpen(false); }}
-                      />
-                      <ProfileMenuItem
-                        icon="signup"
-                        label="Sign up"
-                        onClick={() => { navigate("/signup"); setIsProfileMenuOpen(false); }}
-                      />
-                    </>
-                  )}
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 mt-3 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 py-3 overflow-hidden" style={{ zIndex: 9999 }}>
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                    <span className="block text-sm font-semibold text-gray-900 dark:text-white">Account</span>
+                    <span className="block text-xs text-gray-500 dark:text-gray-400">Manage your settings</span>
+                  </div>
+                  <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
+                  <div>
+                    {!user && (
+                      <>
+                        <ProfileMenuItem icon="login" label="Log in" onClick={() => { navigate('/login'); setIsProfileMenuOpen(false); }} />
+                        <ProfileMenuItem icon="signup" label="Sign up" onClick={() => { navigate('/signup'); setIsProfileMenuOpen(false); }} />
+                      </>
+                    )}
+
+                    {user && !hasListings && (
+                      <>
+                        <ProfileMenuItem icon="home" label="Become a Host" onClick={() => { navigate('/host/create'); setIsProfileMenuOpen(false); }} />
+                        <ProfileMenuItem icon="airbnb" label="Trips" onClick={() => { navigate('/trips'); setIsProfileMenuOpen(false); }} />
+                        <ProfileMenuItem icon="heart" label="Wishlists" onClick={() => { navigate('/wishlists'); setIsProfileMenuOpen(false); }} />
+                        <ProfileMenuItem icon="profile" label="Profile" onClick={() => { navigate('/profile'); setIsProfileMenuOpen(false); }} />
+                        <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
+                        <ProfileMenuItem icon="logout" label="Log out" onClick={handleLogout} />
+                      </>
+                    )}
+
+                    {user && hasListings && (
+                      <>
+                        <ProfileMenuItem icon="airbnb" label="Switch to hosting" onClick={() => { handleSwitch(); setIsProfileMenuOpen(false); }} />
+                        <ProfileMenuItem icon="airbnb" label="Trips" onClick={() => { navigate('/trips'); setIsProfileMenuOpen(false); }} />
+                        <ProfileMenuItem icon="heart" label="Wishlists" onClick={() => { navigate('/wishlists'); setIsProfileMenuOpen(false); }} />
+                        <ProfileMenuItem icon="profile" label="Profile" onClick={() => { navigate('/profile'); setIsProfileMenuOpen(false); }} />
+                        <div className="h-px bg-gray-100 dark:bg-gray-700 my-2" />
+                        <ProfileMenuItem icon="logout" label="Log out" onClick={handleLogout} />
+                      </>
+                    )}
+                  </div>
 
                   <div className="block md:hidden px-4 py-3 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex items-center justify-between gap-3">
@@ -289,8 +248,6 @@ export default function Navbar({
               )}
             </div>
           </div>
-
-          {/* 4. Mobile Menu Button removed for new navbar design */}
         </div>
       </nav>
 
