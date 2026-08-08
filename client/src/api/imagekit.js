@@ -43,3 +43,13 @@ export async function uploadImages(files, folder = "/staynest") {
 
   return uploadedUrls;
 }
+
+export async function deleteImage(url) {
+  return request("/imagekit/file", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ url }),
+  });
+}

@@ -14,7 +14,10 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ProfileSetupPage from './pages/ProfileSetupPage';
 import MyTripsPage from './pages/MyTripsPage';
-import WishlistsPage from './pages/WishlistsPage';import ProtectedRoute from './components/common/ProtectedRoute';
+import WishlistsPage from './pages/WishlistsPage';
+import HostDashboardPage from './pages/HostDashboard';
+import HostMessagesPage from './pages/HostMessagesPage';
+import ProtectedRoute from './components/common/ProtectedRoute';
 // Data
 import amenities from './data/amenities';
 import bookings from "./data/bookings";
@@ -67,6 +70,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <EditListingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/host/dashboard"
+            element={
+              <ProtectedRoute>
+                <HostDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/host/messages"
+            element={
+              <ProtectedRoute>
+                <HostMessagesPage />
               </ProtectedRoute>
             }
           />

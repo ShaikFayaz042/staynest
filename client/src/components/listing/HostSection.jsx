@@ -18,7 +18,7 @@ export default function HostSection({ hostId }) {
 
       try {
         const [userResponse, listingsResponse] = await Promise.all([
-          fetch(`${apiUrl}/users/${hostId}`, { signal: controller.signal }),
+          fetch(`${apiUrl}/users/public/${hostId}`, { signal: controller.signal }),
           fetch(`${apiUrl}/listings`, { signal: controller.signal }),
         ]);
 

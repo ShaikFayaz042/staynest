@@ -11,6 +11,7 @@ export default function MapboxMap({
   longitude = 78.9629,
   draggable = false,
   onDragEnd,
+  onMapDoubleClick,
   zoom = 12,
   className = "w-full h-[360px] rounded-2xl",
   mapStyle,
@@ -33,6 +34,7 @@ export default function MapboxMap({
       style,
       center: [longitude, latitude],
       zoom,
+      doubleClickZoom: !Boolean(onMapDoubleClick),
     });
 
     markerRef.current = new mapboxgl.Marker({ draggable, color: "#ff385c" })
@@ -59,6 +61,15 @@ export default function MapboxMap({
       markerRef.current.on("dragend", () => {
         const lngLat = markerRef.current.getLngLat();
         onDragEnd({ longitude: lngLat.lng, latitude: lngLat.lat });
+      });
+    }
+
+    if (typeof onMapDoubleClick === "function") {
+      mapRef.current.on("dblclick", (event) => {
+        const { lng, lat } = event.lngLat;
+        markerRef.current?.setLngLat([lng, lat]);
+        mapRef.current.flyTo({ center: [lng, lat], essential: true });
+        onMapDoubleClick({ longitude: lng, latitude: lat });
       });
     }
 

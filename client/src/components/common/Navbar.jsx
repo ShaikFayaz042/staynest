@@ -58,9 +58,9 @@ export default function Navbar({
 
   // Host dashboard tabs
   const hostTabs = [
+    { label: "Dashboard", path: "/host/dashboard" },
     { label: "Listings", path: "/host" },
-    { label: "Calendar" },
-    { label: "Messages" },
+    { label: "Messages", path: "/host/messages" },
   ];
 
   // Profile sub-nav tabs
@@ -93,15 +93,8 @@ export default function Navbar({
 
           {variant === "host-dashboard" && (
             <div className="flex items-center gap-6">
-              {hostTabs.map((tab, index) => {
-                let isActive = path === tab.path;
-                if (
-                  index === 0 &&
-                  path.startsWith("/host") &&
-                  !hostTabs.some((t, i) => i !== 0 && t.path && path.includes(t.path))
-                ) {
-                  isActive = true;
-                }
+              {hostTabs.map((tab) => {
+                const isActive = path === tab.path;
 
                 return (
                   <button

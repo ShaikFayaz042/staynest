@@ -1,19 +1,17 @@
 ﻿import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const apiUrl = import.meta.env.VITE_API_URL;
-
-function parseDate(value) {
-  if (!value) return null;
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
 
 function hasDateOverlap(startA, endA, startB, endB) {
   return startA < endB && endA > startB;
 }
 
 export default function BookingCard({ list }) {
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const pricePerNight = list.pricePerNight || 0;
@@ -23,6 +21,7 @@ export default function BookingCard({ list }) {
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
   const [message, setMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [bookings, setBookings] = useState([]);
 
   const nights = checkIn && checkOut ? Math.max(0, Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24))) : 0;
@@ -39,7 +38,10 @@ export default function BookingCard({ list }) {
       }
 
       try {
-        const response = await fetch(`${apiUrl}/bookings?listing=${listingId}`, { signal: controller.signal });
+        const response = await fetch(`${apiUrl}/bookings?listing=${listingId}`, {
+          signal: controller.signal,
+          credentials: "include",
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch bookings");
         }
@@ -58,19 +60,49 @@ export default function BookingCard({ list }) {
     return () => controller.abort();
   }, [list]);
 
+  const bookedIntervals = useMemo(() => {
+    const listingId = String(list._id || list.id || "");
+    return bookings
+      .filter((b) => {
+        const bookingListingId =
+          b?.listing?._id || b?.listing?.id || b?.listing || b?.listingId || "";
+        return String(bookingListingId) === listingId && b.status !== "cancelled";
+      })
+      .map((b) => ({
+        start: new Date(b.checkIn),
+        end: new Date(b.checkOut),
+      }));
+  }, [bookings, list]);
+
+  const isDateBooked = (date) => {
+    return bookedIntervals.some(
+      ({ start, end }) => date >= start && date < end
+    );
+  };
+
   const conflictingBooking = useMemo(() => {
     if (!checkIn || !checkOut || nights <= 0) return null;
 
-    const start = parseDate(checkIn);
-    const end = parseDate(checkOut);
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
     const listingId = String(list._id || list.id || "");
 
-    return bookings.find((booking) => {
-      if (String(booking.listing || booking.listingId || "") !== listingId || booking.status === "cancelled") return false;
-      const bookingStart = parseDate(new Date(booking.checkIn).toISOString().split("T")[0]);
-      const bookingEnd = parseDate(new Date(booking.checkOut).toISOString().split("T")[0]);
-      return bookingStart && bookingEnd && hasDateOverlap(start, end, bookingStart, bookingEnd);
-    }) || null;
+    return (
+      bookings.find((booking) => {
+        if (
+          String(booking.listing || booking.listingId || "") !== listingId ||
+          booking.status === "cancelled"
+        )
+          return false;
+        const bookingStart = new Date(booking.checkIn);
+        const bookingEnd = new Date(booking.checkOut);
+        return (
+          bookingStart &&
+          bookingEnd &&
+          hasDateOverlap(start, end, bookingStart, bookingEnd)
+        );
+      }) || null
+    );
   }, [checkIn, checkOut, list, nights, bookings]);
 
   const availabilityMessage = useMemo(() => {
@@ -112,7 +144,6 @@ export default function BookingCard({ list }) {
 
     const listingId = list._id || list.id;
     const payload = {
-      user: user.id,
       listing: listingId,
       checkIn,
       checkOut,
@@ -126,6 +157,7 @@ export default function BookingCard({ list }) {
     try {
       const response = await fetch(`${apiUrl}/bookings`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -140,11 +172,15 @@ export default function BookingCard({ list }) {
         setBookings((prev) => [...prev, createdBooking]);
       }
 
-      setMessage("Booking confirmed! 🎉");
-      setTimeout(() => setMessage(""), 4000);
+      setSuccessMessage("Booking confirmed! Redirecting to your trips...");
+      setMessage("");
       setCheckIn("");
       setCheckOut("");
       setGuests(1);
+
+      setTimeout(() => {
+        navigate("/trips");
+      }, 1200);
     } catch (err) {
       console.error(err);
       setMessage("Unable to confirm booking. Please try again.");
@@ -167,27 +203,55 @@ export default function BookingCard({ list }) {
           <span className="text-sm text-gray-700 dark:text-gray-400"> / night</span>
         </div>
 
-        <div className="mb-3 grid grid-cols-2 rounded-xl border border-gray-300 dark:border-gray-600">
+        <div className="mb-3 grid grid-cols-2 rounded-xl border border-gray-300 dark:border-gray-600 overflow-hidden">
           <div className="border-r border-gray-300 dark:border-gray-600 p-3">
             <div className="text-[10px] font-bold text-gray-900 dark:text-white">CHECK-IN</div>
-            <input
-              type="date"
-              value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
-              // Added dark:[color-scheme:dark] and cursor-pointer
-              className="w-full text-sm text-gray-700 dark:text-gray-300 outline-none bg-transparent cursor-pointer dark:[color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-              min={new Date().toISOString().split("T")[0]}
+            <DatePicker
+              selected={checkIn ? new Date(checkIn) : null}
+              onChange={(date) =>
+                setCheckIn(date ? date.toISOString().split("T")[0] : "")
+              }
+              selectsStart
+              startDate={checkIn ? new Date(checkIn) : null}
+              endDate={checkOut ? new Date(checkOut) : null}
+              minDate={new Date()}
+              filterDate={(date) => !isDateBooked(date)}
+              placeholderText="Select date"
+              className="w-full text-sm text-gray-700 dark:text-gray-300 outline-none bg-transparent cursor-pointer"
+              wrapperClassName="w-full"
+              calendarClassName="!rounded-2xl !border !border-gray-200 dark:!border-gray-700 !shadow-lg"
+              popperClassName="!z-50"
+              dateFormat="dd/MM/yyyy"
+              showMonthDropdown
+              showYearDropdown
+              dropdownMode="select"
             />
           </div>
           <div className="p-3">
             <div className="text-[10px] font-bold text-gray-900 dark:text-white">CHECKOUT</div>
-            <input
-              type="date"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-              // Added dark:[color-scheme:dark] and cursor-pointer
-              className="w-full text-sm text-gray-700 dark:text-gray-300 outline-none bg-transparent cursor-pointer dark:[color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-              min={checkIn || new Date().toISOString().split("T")[0]}
+            <DatePicker
+              selected={checkOut ? new Date(checkOut) : null}
+              onChange={(date) =>
+                setCheckOut(date ? date.toISOString().split("T")[0] : "")
+              }
+              selectsEnd
+              startDate={checkIn ? new Date(checkIn) : null}
+              endDate={checkOut ? new Date(checkOut) : null}
+              minDate={
+                checkIn
+                  ? new Date(new Date(checkIn).setDate(new Date(checkIn).getDate() + 1))
+                  : new Date()
+              }
+              filterDate={(date) => !isDateBooked(date)}
+              placeholderText="Select date"
+              className="w-full text-sm text-gray-700 dark:text-gray-300 outline-none bg-transparent cursor-pointer"
+              wrapperClassName="w-full"
+              calendarClassName="!rounded-2xl !border !border-gray-200 dark:!border-gray-700 !shadow-lg"
+              popperClassName="!z-50"
+              dateFormat="dd/MM/yyyy"
+              showMonthDropdown
+              showYearDropdown
+              dropdownMode="select"
             />
           </div>
         </div>
@@ -249,9 +313,9 @@ export default function BookingCard({ list }) {
         </button>
         <p className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">You won't be charged yet</p>
 
-        {(availabilityMessage || message) && (
-          <div className={`mt-3 text-sm text-center ${message?.includes("confirmed") ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}>
-            {message || availabilityMessage}
+        {(availabilityMessage || message || successMessage) && (
+          <div className={`mt-3 text-sm text-center ${successMessage ? "text-green-600 dark:text-green-400" : message?.includes("confirmed") ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}>
+            {successMessage || message || availabilityMessage}
           </div>
         )}
       </div>

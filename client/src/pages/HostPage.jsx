@@ -8,6 +8,8 @@ import { deleteListing, fetchListings } from '../api/listings';
 export default function HostPage() {
   const { user } = useAuth();
   const [userListings, setUserListings] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [users, setUsers] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -34,10 +36,22 @@ export default function HostPage() {
 
   useEffect(() => {
     loadHostListings();
+
+    const storedBookings = JSON.parse(localStorage.getItem('bookings')) || [];
+    const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+    setBookings(storedBookings);
+    setUsers(storedUsers);
   }, [user]);
 
   const handleDelete = async (listingId) => {
     setConfirmDeleteId(listingId);
+  };
+
+  const getListingBookings = (listingId) => bookings.filter((booking) => booking.listingId === listingId);
+
+  const getGuestName = (userId) => {
+    const guest = users.find((userData) => userData.id === userId || userData._id === userId);
+    return guest?.name || guest?.email || 'Guest';
   };
 
   const confirmDelete = async () => {
@@ -58,29 +72,6 @@ export default function HostPage() {
     }
   };
 
-  useEffect(() => {
-    async function loadHostListings() {
-      if (!user) {
-        setUserListings([]);
-        return;
-      }
-
-      try {
-        const response = await fetchListings();
-        const listings = Array.isArray(response?.data) ? response.data : [];
-        const filtered = listings.filter((listing) => {
-          const hostId = String(listing.host?._id || listing.host || listing.hostId || "");
-          return hostId === String(user.id);
-        });
-        setUserListings(filtered);
-      } catch (error) {
-        console.error(error);
-        setUserListings([]);
-      }
-    }
-
-    loadHostListings();
-  }, [user]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900" style={{ fontFamily: 'Nunito, sans-serif' }}>
@@ -117,36 +108,74 @@ export default function HostPage() {
 
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {userListings.length > 0 ? (
-                userListings.map(listing => (
-                  <div key={listing.id} className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition bg-white dark:bg-gray-800">
-                    <img
-                      src={listing.images[0]}
-                      alt={listing.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4">
-                      <div className="font-semibold text-gray-900 dark:text-white">{listing.title}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{listing.category} · {listing.location.city}</div>
-                      <div className="text-sm font-bold mt-1 text-gray-900 dark:text-white">₹{listing.pricePerNight} / night</div>
-                      <div className="mt-4 flex gap-2">
-                        <Link
-                          to={`/host/listings/${listing._id || listing.id}/edit`}
-                          className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(listing._id || listing.id)}
-                          disabled={deletingId === (listing._id || listing.id)}
-                          className="flex-1 rounded-lg bg-[#FF385C] px-3 py-2 text-center text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
-                        >
-                          {deletingId === (listing._id || listing.id) ? 'Deleting...' : 'Delete'}
-                        </button>
+                userListings.map((listing) => {
+                  const listingId = listing._id || listing.id;
+                  const listingBookings = getListingBookings(listingId).sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
+                  const upcomingBookings = listingBookings.filter((booking) => new Date(booking.checkIn) >= new Date());
+
+                  return (
+                    <div key={listingId} className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition bg-white dark:bg-gray-800">
+                      <img
+                        src={listing.images[0]}
+                        alt={listing.title}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="p-4">
+                        <div className="font-semibold text-gray-900 dark:text-white">{listing.title}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{listing.category} · {listing.location.city}</div>
+                        <div className="text-sm font-bold mt-1 text-gray-900 dark:text-white">₹{listing.pricePerNight} / night</div>
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                          <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900">
+                            <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Bookings</div>
+                            <div className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{listingBookings.length}</div>
+                          </div>
+                          <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900">
+                            <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Next booking</div>
+                            <div className="mt-1 text-sm text-gray-900 dark:text-white">
+                              {upcomingBookings.length === 0
+                                ? 'No upcoming bookings'
+                                : `${getGuestName(upcomingBookings[0].userId)}: ${new Date(upcomingBookings[0].checkIn).toLocaleDateString()} - ${new Date(upcomingBookings[0].checkOut).toLocaleDateString()}`}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 space-y-2">
+                          {listingBookings.length > 0 ? (
+                            listingBookings.slice(0, 2).map((booking) => (
+                              <div key={booking.id} className="rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                <div className="font-semibold text-gray-900 dark:text-white">{getGuestName(booking.userId)}</div>
+                                <div>
+                                  {new Date(booking.checkIn).toLocaleDateString()} - {new Date(booking.checkOut).toLocaleDateString()}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+                              No bookings yet.
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-4 flex gap-2">
+                          <Link
+                            to={`/host/listings/${listingId}/edit`}
+                            className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700"
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(listingId)}
+                            disabled={deletingId === listingId}
+                            className="flex-1 rounded-lg bg-[#FF385C] px-3 py-2 text-center text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
+                          >
+                            {deletingId === listingId ? 'Deleting...' : 'Delete'}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
                   <p>You haven't created any listings yet.</p>

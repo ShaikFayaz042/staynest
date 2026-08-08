@@ -3,8 +3,8 @@ import Booking from "../models/Booking.js";
 
 export async function getBookings(req, res) {
   try {
-    const filter = { user: req.user.userId };
     const { listing } = req.query;
+    const filter = {};
 
     if (listing) {
       if (!mongoose.Types.ObjectId.isValid(listing)) {
@@ -14,9 +14,13 @@ export async function getBookings(req, res) {
         });
       }
       filter.listing = listing;
+    } else {
+      filter.user = req.user.userId;
     }
 
-    const bookings = await Booking.find(filter);
+    let query = Booking.find(filter).populate("listing");
+    const bookings = await query;
+
     res.status(200).json({
       success: true,
       message: "Bookings fetched successfully",
@@ -74,6 +78,38 @@ export async function getBookingById(req, res) {
 
 export async function createBooking(req, res) {
   try {
+    const { listing, checkIn, checkOut } = req.body;
+
+    if (!listing || !checkIn || !checkOut) {
+      return res.status(400).json({
+        success: false,
+        message: "Listing, check-in, and check-out are required",
+      });
+    }
+
+    const startDate = new Date(checkIn);
+    const endDate = new Date(checkOut);
+    if (!(startDate instanceof Date) || isNaN(startDate) || !(endDate instanceof Date) || isNaN(endDate)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid check-in or check-out date",
+      });
+    }
+
+    const conflict = await Booking.findOne({
+      listing,
+      status: { $ne: "cancelled" },
+      checkIn: { $lt: endDate },
+      checkOut: { $gt: startDate },
+    });
+
+    if (conflict) {
+      return res.status(409).json({
+        success: false,
+        message: "Selected dates are no longer available",
+      });
+    }
+
     const booking = await Booking.create({
       ...req.body,
       user: req.user.userId,

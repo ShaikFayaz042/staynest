@@ -92,7 +92,11 @@ export async function updateListing(req, res) {
       });
     }
 
-    if (listing.host.toString() !== req.user.userId) {
+    const userRoles = Array.isArray(req.user.roles) ? req.user.roles : [req.user.roles].filter(Boolean);
+    const isAdmin = userRoles.includes("Admin");
+    const isOwner = listing.host.toString() === req.user.userId;
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: "Forbidden",
@@ -104,6 +108,7 @@ export async function updateListing(req, res) {
 
     const updatedListing = await Listing.findByIdAndUpdate(id, updates, {
       new: true,
+      runValidators: true,
     });
 
     res.status(200).json({
@@ -139,7 +144,11 @@ export async function deleteListing(req, res) {
       });
     }
 
-    if (listing.host.toString() !== req.user.userId) {
+    const userRoles = Array.isArray(req.user.roles) ? req.user.roles : [req.user.roles].filter(Boolean);
+    const isAdmin = userRoles.includes("Admin");
+    const isOwner = listing.host.toString() === req.user.userId;
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: "Forbidden",

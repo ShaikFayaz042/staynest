@@ -11,7 +11,7 @@ router.route("/")
 
 router.route("/:id")
 .get(getListingById)
-.patch(verifyJWT, authorizeRoles("Host", "Admin"), updateListing)
-.delete(verifyJWT, authorizeRoles("Host", "Admin"), deleteListing);
+.patch(verifyJWT, updateListing)
+.delete(verifyJWT, deleteListing);
 
 export default router;

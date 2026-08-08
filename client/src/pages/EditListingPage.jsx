@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 import MapboxMap from '../components/common/MapboxMap';
-import { uploadImages } from '../api/imagekit';
+import { uploadImages, deleteImage } from '../api/imagekit';
 import { fetchListingById, updateListing as apiUpdateListing, deleteListing as apiDeleteListing } from '../api/listings';
 import categories from '../data/categories';
 import amenitiesData from '../data/amenities';
@@ -18,6 +18,7 @@ const emptyForm = {
   bathrooms: 1,
   images: [],
   amenities: [],
+  bedrooms: [],
   location: {
     address: '',
     city: '',
@@ -37,9 +38,15 @@ export default function EditListingPage() {
   const [deleting, setDeleting] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [imageError, setImageError] = useState('');
   const [availableAmenities] = useState(amenitiesData);
+  const [validationError, setValidationError] = useState('');
+  const allAmenityItems = Object.values(availableAmenities).flat();
+  const amenityNameToId = Object.fromEntries(allAmenityItems.map((item) => [item.name, item.id]));
+  const amenityIdToName = Object.fromEntries(allAmenityItems.map((item) => [item.id, item.name]));
   const fileInputRef = useRef(null);
+  const bedroomInputRefs = useRef([]);
 
   useEffect(() => {
     async function loadListing() {
@@ -61,7 +68,19 @@ export default function EditListingPage() {
           beds: listing.beds || 1,
           bathrooms: listing.bathrooms || 1,
           images: Array.isArray(listing.images) ? listing.images : [],
-          amenities: Array.isArray(listing.amenities) ? listing.amenities : [],
+          amenities: Array.isArray(listing.amenities)
+            ? listing.amenities.map((amenity) => {
+                if (allAmenityItems.some((item) => item.id === amenity)) return amenity;
+                return amenityNameToId[amenity] || amenity;
+              })
+            : [],
+          bedrooms: Array.isArray(listing.bedrooms)
+            ? listing.bedrooms.map((bedroom, index) => ({
+                title: bedroom.title || `Bedroom ${index + 1}`,
+                beds: bedroom.beds || 1,
+                images: Array.isArray(bedroom.images) ? bedroom.images : [],
+              }))
+            : [],
           location: {
             address: listing.location?.address || '',
             city: listing.location?.city || '',
@@ -83,6 +102,7 @@ export default function EditListingPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setValidationError('');
 
     if (name.startsWith('location.')) {
       const field = name.split('.')[1];
@@ -102,11 +122,57 @@ export default function EditListingPage() {
     }));
   };
 
-  const handleRemoveImage = (index) => {
+  const validateForm = () => {
+    if (!form.title?.trim()) return 'Please enter a title.';
+    if (!form.description?.trim()) return 'Please enter a description.';
+    if (!form.category?.trim()) return 'Please select a category.';
+    if (!form.pricePerNight || Number(form.pricePerNight) <= 0) return 'Please enter a valid price per night.';
+    if (!form.guests || Number(form.guests) < 1) return 'Please enter at least 1 guest.';
+    if (!form.beds || Number(form.beds) < 1) return 'Please enter at least 1 bed.';
+    if (!form.bathrooms || Number(form.bathrooms) < 1) return 'Please enter at least 1 bathroom.';
+
+    const listingPhotos = Array.isArray(form.images)
+      ? form.images.filter((item) => typeof item === 'string' && item.trim())
+      : [];
+    if (listingPhotos.length < 5) return 'Please upload at least 5 listing photos.';
+
+    const selectedAmenities = Array.isArray(form.amenities) ? form.amenities : [];
+    if (selectedAmenities.length < 4) return 'Please select at least 4 amenities.';
+
+    if (!form.location.address?.trim()) return 'Please enter the address.';
+    if (!form.location.city?.trim()) return 'Please enter the city.';
+    if (!form.location.state?.trim()) return 'Please enter the state.';
+    if (!form.location.country?.trim()) return 'Please enter the country.';
+
+    const bedroomIssue = Array.isArray(form.bedrooms)
+      ? form.bedrooms.findIndex((bedroom) => !Array.isArray(bedroom.images) || bedroom.images.filter((item) => typeof item === 'string' && item.trim()).length < 1)
+      : -1;
+    if (bedroomIssue >= 0) return `Bedroom ${bedroomIssue + 1} requires at least one photo.`;
+
+    return '';
+  };
+
+  const handleRemoveImage = async (index) => {
+    if (!Array.isArray(form.images) || form.images.length <= 5) {
+      setValidationError('Add a new photo before deleting this one. A minimum of 5 listing photos is required.');
+      return;
+    }
+
+    setValidationError('');
+    const imageUrl = form.images[index];
     setForm((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
+
+    if (imageUrl) {
+      try {
+        await deleteImage(imageUrl);
+      } catch (err) {
+        console.warn("Failed to delete image from ImageKit:", err);
+        setImageError("Unable to delete remote image. Please try again.");
+      }
+    }
   };
 
   const handleCategorySelect = (name) => {
@@ -134,6 +200,7 @@ export default function EditListingPage() {
 
     setUploadingImages(true);
     setImageError('');
+    setValidationError('');
 
     try {
       const uploadedUrls = await uploadImages(files, '/staynest/listings/edit');
@@ -153,6 +220,14 @@ export default function EditListingPage() {
     e.preventDefault();
     setSaving(true);
     setError('');
+    setValidationError('');
+
+    const validationMessage = validateForm();
+    if (validationMessage) {
+      setValidationError(validationMessage);
+      setSaving(false);
+      return;
+    }
 
     try {
       const payload = {
@@ -161,8 +236,16 @@ export default function EditListingPage() {
         guests: Number(form.guests),
         beds: Number(form.beds),
         bathrooms: Number(form.bathrooms),
-        images: Array.isArray(form.images)
-          ? form.images.filter((item) => typeof item === 'string' && item.trim())
+        images: listingPhotos,
+        amenities: Array.isArray(form.amenities)
+          ? form.amenities.map((amenity) => amenityIdToName[amenity] || amenity)
+          : [],
+        bedrooms: Array.isArray(form.bedrooms)
+          ? form.bedrooms.map((bedroom) => ({
+              title: bedroom.title || 'Bedroom',
+              beds: Number(bedroom.beds || 1),
+              images: Array.isArray(bedroom.images) ? bedroom.images.filter((item) => typeof item === 'string' && item.trim()) : [],
+            }))
           : [],
         location: {
           ...form.location,
@@ -172,15 +255,16 @@ export default function EditListingPage() {
       };
 
       await apiUpdateListing(id, payload);
-      navigate('/host');
+      setSuccessMessage('Listing updated successfully!');
+      setSaving(false);
+      setTimeout(() => navigate('/host'), 1400);
     } catch (err) {
       setError(err.message || 'Failed to update listing.');
-    } finally {
       setSaving(false);
     }
   };
 
-  const handleMapDrag = ({ latitude, longitude }) => {
+  const handleMapUpdate = ({ latitude, longitude }) => {
     setForm((prev) => ({
       ...prev,
       location: {
@@ -190,6 +274,79 @@ export default function EditListingPage() {
       },
     }));
   };
+
+  const handleBedroomPhotoUpload = async (index, event) => {
+    const selectedFiles = Array.from(event.target.files || []).filter((file) => file.type.startsWith('image/'));
+    if (selectedFiles.length === 0) return;
+
+    setImageError('');
+    try {
+      const uploadedUrls = await uploadImages(selectedFiles, '/staynest/listings/bedroom');
+      setForm((prev) => {
+        const nextBedrooms = Array.isArray(prev.bedrooms) ? [...prev.bedrooms] : [];
+        nextBedrooms[index] = {
+          ...nextBedrooms[index],
+          title: nextBedrooms[index]?.title || `Bedroom ${index + 1}`,
+          beds: nextBedrooms[index]?.beds || 1,
+          images: [
+            ...(Array.isArray(nextBedrooms[index]?.images) ? nextBedrooms[index].images : []),
+            ...uploadedUrls,
+          ],
+        };
+        return { ...prev, bedrooms: nextBedrooms };
+      });
+    } catch (err) {
+      setImageError(err.message || 'Bedroom photo upload failed.');
+    }
+  };
+
+  const handleRemoveBedroomPhoto = async (bedroomIndex, photoIndex) => {
+    const bedroom = form.bedrooms?.[bedroomIndex];
+    if (!Array.isArray(bedroom?.images) || bedroom.images.length <= 1) {
+      setValidationError('Each bedroom must keep at least one photo. Add a new photo before deleting this one.');
+      return;
+    }
+    setValidationError('');
+
+    const imageUrl = bedroom.images[photoIndex];
+    setForm((prev) => {
+      const nextBedrooms = Array.isArray(prev.bedrooms) ? [...prev.bedrooms] : [];
+      if (!nextBedrooms[bedroomIndex]) return prev;
+      const nextImages = Array.isArray(nextBedrooms[bedroomIndex].images)
+        ? nextBedrooms[bedroomIndex].images.filter((_, idx) => idx !== photoIndex)
+        : [];
+      nextBedrooms[bedroomIndex] = { ...nextBedrooms[bedroomIndex], images: nextImages };
+      return { ...prev, bedrooms: nextBedrooms };
+    });
+
+    if (imageUrl) {
+      try {
+        await deleteImage(imageUrl);
+      } catch (err) {
+        console.warn("Failed to delete bedroom image from ImageKit:", err);
+        setImageError("Unable to delete remote bedroom image. Please try again.");
+      }
+    }
+  };
+
+  const handleAddBedroom = () => {
+    setForm((prev) => {
+      const nextBedrooms = Array.isArray(prev.bedrooms) ? [...prev.bedrooms] : [];
+      nextBedrooms.push({ title: `Bedroom ${nextBedrooms.length + 1}`, beds: 1, images: [] });
+      return { ...prev, bedrooms: nextBedrooms };
+    });
+  };
+
+  const handleRemoveBedroom = (index) => {
+    setForm((prev) => {
+      const nextBedrooms = Array.isArray(prev.bedrooms) ? prev.bedrooms.filter((_, idx) => idx !== index) : [];
+      return { ...prev, bedrooms: nextBedrooms };
+    });
+  };
+
+  const mapLatitude = form.location.latitude === '' || form.location.latitude === undefined ? undefined : Number(form.location.latitude);
+  const mapLongitude = form.location.longitude === '' || form.location.longitude === undefined ? undefined : Number(form.location.longitude);
+  const hasListingLocation = mapLatitude !== undefined && mapLongitude !== undefined && !Number.isNaN(mapLatitude) && !Number.isNaN(mapLongitude);
 
   const handleDelete = async () => {
     if (!window.confirm('Delete this listing?')) return;
@@ -231,6 +388,18 @@ export default function EditListingPage() {
           {error ? (
             <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
+            </div>
+          ) : null}
+          {successMessage ? (
+            <div className="fixed right-6 top-6 z-50 rounded-3xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-800 shadow-lg dark:border-green-700 dark:bg-green-950/95 dark:text-green-200">
+              <div className="font-semibold">Success</div>
+              <div className="mt-1">{successMessage}</div>
+            </div>
+          ) : null}
+          {validationError ? (
+            <div className="fixed right-6 top-24 z-50 rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-800 shadow-lg dark:border-red-700 dark:bg-red-950/95 dark:text-red-200">
+              <div className="font-semibold">Validation error</div>
+              <div className="mt-1">{validationError}</div>
             </div>
           ) : null}
 
@@ -411,6 +580,22 @@ export default function EditListingPage() {
                       onChange={handleUploadFiles}
                     />
                   </div>
+                  {Array.isArray(form.images) && form.images.length > 0 && (
+                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {form.images.map((image, index) => (
+                        <div key={index} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-900">
+                          <img src={image} alt={`Listing photo ${index + 1}`} className="h-40 w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(index)}
+                            className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[11px] font-semibold text-gray-900 shadow-sm transition hover:bg-white dark:bg-gray-950/90 dark:text-white"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {imageError && (
                     <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
                       {imageError}
@@ -418,19 +603,78 @@ export default function EditListingPage() {
                   )}
                 </div>
                 <div className="md:col-span-2">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {form.images.map((image, index) => (
-                      <div key={index} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                        <img src={image} alt={`Listing preview ${index + 1}`} className="h-40 w-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(index)}
-                          className="absolute top-3 right-3 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-gray-900 shadow-sm transition hover:bg-white dark:bg-gray-950/90 dark:text-white"
-                        >
-                          Remove
-                        </button>
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Bedroom photos</h2>
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Upload and remove bedroom photos for each bedroom.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddBedroom}
+                      className="rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                    >
+                      Add bedroom
+                    </button>
+                  </div>
+                  <div className="mt-4 space-y-4">
+                    {form.bedrooms.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+                        No bedroom photo groups yet. Add a bedroom to start uploading photos.
                       </div>
-                    ))}
+                    ) : (
+                      form.bedrooms.map((bedroom, index) => (
+                        <div key={index} className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{bedroom.title || `Bedroom ${index + 1}`}</h3>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{Array.isArray(bedroom.images) ? bedroom.images.length : 0} photo{bedroom.images?.length === 1 ? '' : 's'}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => bedroomInputRefs.current[index]?.click()}
+                                className="rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                              >
+                                Upload
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveBedroom(index)}
+                                className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200 dark:hover:bg-red-900/50"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                          <input
+                            ref={(element) => {
+                              bedroomInputRefs.current[index] = element;
+                            }}
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) => handleBedroomPhotoUpload(index, event)}
+                          />
+                          {Array.isArray(bedroom.images) && bedroom.images.length > 0 && (
+                            <div className="mt-4 grid grid-cols-2 gap-3">
+                              {bedroom.images.map((image, photoIndex) => (
+                                <div key={photoIndex} className="group relative overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-950">
+                                  <img src={image} alt={`Bedroom ${index + 1} photo ${photoIndex + 1}`} className="h-36 w-full object-cover" />
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveBedroomPhoto(index, photoIndex)}
+                                    className="absolute top-3 right-3 rounded-full bg-white/90 px-2 py-1 text-[11px] font-semibold text-gray-900 shadow-sm transition hover:bg-white dark:bg-gray-950/90 dark:text-white"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
 
@@ -501,28 +745,38 @@ export default function EditListingPage() {
                 <label className="mb-1 block text-sm font-semibold text-gray-700 dark:text-gray-200">Adjust location</label>
                 <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700">
                   <MapboxMap
-                    latitude={Number(form.location.latitude) || 20.5937}
-                    longitude={Number(form.location.longitude) || 78.9629}
-                    draggable={true}
+                    latitude={hasListingLocation ? mapLatitude : 20.5937}
+                    longitude={hasListingLocation ? mapLongitude : 78.9629}
+                    draggable={false}
                     disableMapClickMove={true}
-                    onDragEnd={handleMapDrag}
-                    zoom={12}
+                    onMapDoubleClick={handleMapUpdate}
+                    zoom={hasListingLocation ? 12 : 4}
                     className="w-full h-[420px]"
                   />
                 </div>
                 <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                  Drag the pin to update the listing location. Click outside the pin to recenter the map.
+                  Double-click on the map to update the listing location. The map preloads the saved coordinates if available.
                 </p>
               </div>
 
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="rounded-full bg-[#FF385C] px-6 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
-                >
-                  {saving ? 'Saving...' : 'Save changes'}
-                </button>
+              <div className="space-y-3">
+                {validationError ? (
+                  <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+                    {validationError}
+                  </div>
+                ) : null}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    Minimum 5 listing photos, at least 4 amenities, and at least one photo per bedroom are required.
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="rounded-full bg-[#FF385C] px-6 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
+                  >
+                    {saving ? 'Saving...' : 'Save changes'}
+                  </button>
+                </div>
               </div>
             </form>
           )}
