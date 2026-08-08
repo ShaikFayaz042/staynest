@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import { connectDB } from "./src/db/db.js";
-import User from "./src/models/User.js";
-import Listing from "./src/models/Listing.js";
-import Booking from "./src/models/Booking.js";
-import Review from "./src/models/Review.js";
-import Wishlist from "./src/models/Wishlist.js";
+import { connectDB } from "../src/db/db.js";
+import User from "../src/models/User.js";
+import Listing from "../src/models/Listing.js";
+import Booking from "../src/models/Booking.js";
+import Review from "../src/models/Review.js";
+import Wishlist from "../src/models/Wishlist.js";
 import usersData from "../client/src/data/users.js";
 import listingsData from "../client/src/data/listings.js";
 import bookingsData from "../client/src/data/bookings.js";

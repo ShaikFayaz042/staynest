@@ -24,6 +24,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-README-api-tests.md
-StayNest-API.postman_collection.json
