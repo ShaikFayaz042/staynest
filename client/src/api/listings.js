@@ -1,5 +1,22 @@
 const apiUrl = import.meta.env.VITE_API_URL || '';
 
+export async function getListings() {
+  const res = await fetch(`${apiUrl}/listings`);
+  if (!res.ok) throw new Error('Failed to fetch listings');
+  const payload = await res.json();
+  return payload.data || [];
+}
+
+export async function getListingById(id) {
+  const res = await fetch(`${apiUrl}/listings/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch listing');
+  const payload = await res.json();
+  return payload.data;
+}
+
+export default { getListings, getListingById };
+// const apiUrl = import.meta.env.VITE_API_URL || '';
+
 async function request(path, options = {}) {
   const response = await fetch(`${apiUrl}${path}`, {
     credentials: 'include',

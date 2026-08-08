@@ -5,13 +5,11 @@ import StayInfo from "../components/listing/StayInfo";
 import BedroomSection from "../components/listing/BedroomSection";
 import Amenities from "../components/listing/Amenities";
 import BookingCard from "../components/listing/BookingCard";
-import RatingSummary from "../components/listing/RatingSummary";
-import ReviewSection from "../components/listing/ReviewSection";
+import ListingReviews from "../components/listing/ListingReviews";
 import MapSection from "../components/listing/MapSection";
 import HostSection from "../components/listing/HostSection";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import ListingReviews from "../components/listing/ListingReviews";
 
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -58,8 +56,6 @@ export default function ListingPage() {
             <BookingCard list={listing} />
           </div>
         </div>
-        {/* <RatingSummary listingId={listing._id || listing.id} />
-        <ReviewSection listingId={listing._id || listing.id} /> */}
         <ListingReviews listingId={listing._id || listing.id}></ListingReviews>
         <MapSection location={listing.location} />
         <HostSection hostId={

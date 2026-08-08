@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import ScrollRow from './ScrollRow';
 import { defaultFilters } from './FilterBar';
 
-// const listings = JSON.parse(localStorage.getItem('listings')) || [];
 const apiUrl = import.meta.env.VITE_API_URL;
 
 async function getListings() {

@@ -14,7 +14,6 @@ import PhotosStep from "../components/host/PhotosStep";
 import TitleDescriptionStep from "../components/host/TitleDescriptionStep";
 import PricingStep from "../components/host/PricingStep";
 
-// Helper to load amenities from localStorage
 function getAmenitiesMap() {
   const FALLBACK = {
     basics: [
@@ -61,29 +60,10 @@ function getAmenitiesMap() {
     ]
   };
 
-  try {
-    const raw = localStorage.getItem("amenities");
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object") {
-        // Flatten into { id: name } map
-        const map = {};
-        Object.values(parsed).forEach(category => {
-          category.forEach(item => {
-            map[item.id] = item.name;
-          });
-        });
-        return map;
-      }
-    }
-  } catch (e) {
-    console.warn("Failed to parse amenities from localStorage", e);
-  }
-
-  // Flatten fallback
+  // Flatten fallback amenities into { id: name }
   const map = {};
-  Object.values(FALLBACK).forEach(category => {
-    category.forEach(item => {
+  Object.values(FALLBACK).forEach((category) => {
+    category.forEach((item) => {
       map[item.id] = item.name;
     });
   });

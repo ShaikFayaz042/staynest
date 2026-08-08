@@ -18,15 +18,6 @@ const FALLBACK_CATEGORIES = [
 ];
 
 const getInitialCategories = () => {
-  try {
-    const raw = localStorage.getItem("categories");
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && parsed.length) return parsed;
-    }
-  } catch (e) {
-    console.warn("Failed to parse categories from localStorage", e);
-  }
   return FALLBACK_CATEGORIES;
 };
 

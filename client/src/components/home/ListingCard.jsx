@@ -1,13 +1,36 @@
 ﻿import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { isListingSaved, toggleListingWishlist } from "../../utils/wishlist";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getUserWishlistItems, createWishlist, deleteWishlist } from "../../api/wishlist";
 
 export default function ListingCard({ listing }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [saveToggle, setSaveToggle] = useState(false);
-  const saved = isListingSaved(user?.id, listing._id);
+  const [saved, setSaved] = useState(false);
+  const [wishlistItemId, setWishlistItemId] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function checkSaved() {
+      if (!user) {
+        if (mounted) setSaved(false);
+        return;
+      }
+      try {
+        const items = await getUserWishlistItems();
+        const found = items.find((it) => String(it.listing) === String(listing._id));
+        if (mounted) {
+          setSaved(!!found);
+          setWishlistItemId(found?._id || null);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    checkSaved();
+    return () => { mounted = false; };
+  }, [user, listing._id]);
 
   const handleClick = () => {
     navigate(`/listing/${listing._id}`);
@@ -19,7 +42,30 @@ export default function ListingCard({ listing }) {
       navigate("/login");
       return;
     }
-    toggleListingWishlist(user.id, listing._id);
+    (async () => {
+      try {
+        if (!saved) {
+          const created = await createWishlist(listing._id);
+          setSaved(true);
+          setWishlistItemId(created._id || created.id);
+        } else if (wishlistItemId) {
+          await deleteWishlist(wishlistItemId);
+          setSaved(false);
+          setWishlistItemId(null);
+        } else {
+          // fallback: refetch to find id then delete
+          const items = await getUserWishlistItems();
+          const found = items.find((it) => String(it.listing) === String(listing._id));
+          if (found) {
+            await deleteWishlist(found._id);
+            setSaved(false);
+            setWishlistItemId(null);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    })();
     setSaveToggle(!saveToggle);
   };
 

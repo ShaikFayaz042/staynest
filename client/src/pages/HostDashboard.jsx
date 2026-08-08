@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { getListings } from '../api/listings';
+import { getBookingsForListing } from '../api/bookings';
 import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 
@@ -108,23 +110,47 @@ export default function HostDashboardPage() {
   };
 
   useEffect(() => {
-    const bookings = JSON.parse(localStorage.getItem('bookings')) || [];
-    const allListings = JSON.parse(localStorage.getItem('listings')) || [];
-    const allUsers = JSON.parse(localStorage.getItem('users')) || [];
-    const hostListings = allListings.filter((listing) => String(listing.hostId || listing.host) === String(user?.id));
-    const hostListingIds = hostListings.map((listing) => listing.id || listing._id);
-    const filteredBookings = bookings
-      .filter((booking) => hostListingIds.includes(booking.listingId))
-      .map((booking) => ({
-        ...booking,
-        listing: hostListings.find((listing) => listing.id === booking.listingId || listing._id === booking.listingId),
-        guest: allUsers.find((userData) => userData.id === booking.userId || userData._id === booking.userId),
-      }))
-      .sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
+    let mounted = true;
+    async function loadHostData() {
+      if (!user) {
+        if (mounted) {
+          setHostBookings([]);
+          setListings([]);
+          setUsers([]);
+        }
+        return;
+      }
 
-    setHostBookings(filteredBookings);
-    setListings(hostListings);
-    setUsers(allUsers);
+      try {
+        const allListings = await getListings();
+        const hostListings = allListings.filter((listing) => String(listing.host?._id || listing.host || listing.hostId || '') === String(user.id));
+        const bookingPromises = hostListings.map((l) => getBookingsForListing(l._id || l.id));
+        const bookingsArr = await Promise.all(bookingPromises);
+        const merged = bookingsArr.flat().map((b) => ({
+          ...b,
+          guest: b.user || null,
+        }));
+        merged.sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
+        if (mounted) {
+          setHostBookings(merged);
+          setListings(hostListings);
+          // derive users from bookings
+          const usersMap = {};
+          merged.forEach((b) => { if (b.guest) usersMap[b.guest._id || b.guest.id] = b.guest; });
+          setUsers(Object.values(usersMap));
+        }
+      } catch (err) {
+        console.error(err);
+        if (mounted) {
+          setHostBookings([]);
+          setListings([]);
+          setUsers([]);
+        }
+      }
+    }
+
+    loadHostData();
+    return () => { mounted = false; };
   }, [user]);
 
   return (

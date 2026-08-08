@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Footer from '../components/common/Footer';
 import Navbar from '../components/common/Navbar';
 import { deleteListing, fetchListings } from '../api/listings';
+import { getBookingsForListing } from '../api/bookings';
 
 export default function HostPage() {
   const { user } = useAuth();
@@ -36,11 +37,28 @@ export default function HostPage() {
 
   useEffect(() => {
     loadHostListings();
+    let mounted = true;
+    async function loadBookingsForHost() {
+      try {
+        const lists = await fetchListings();
+        const allListings = Array.isArray(lists?.data) ? lists.data : [];
+        const hostLists = allListings.filter((listing) => String(listing.host?._id || listing.host || listing.hostId || '') === String(user?.id));
+        const bookingPromises = hostLists.map((l) => getBookingsForListing(l._id || l.id));
+        const bookingsArr = await Promise.all(bookingPromises);
+        const merged = bookingsArr.flat().map((b) => ({ ...b, guest: b.user || null }));
+        if (mounted) {
+          setBookings(merged);
+          const usersMap = {};
+          merged.forEach((b) => { if (b.guest) usersMap[b.guest._id || b.guest.id] = b.guest; });
+          setUsers(Object.values(usersMap));
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
-    const storedBookings = JSON.parse(localStorage.getItem('bookings')) || [];
-    const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
-    setBookings(storedBookings);
-    setUsers(storedUsers);
+    loadBookingsForHost();
+    return () => { mounted = false; };
   }, [user]);
 
   const handleDelete = async (listingId) => {

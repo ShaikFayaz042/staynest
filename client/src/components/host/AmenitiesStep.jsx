@@ -48,15 +48,6 @@ const FALLBACK_AMENITIES = {
 };
 
 const getInitialAmenities = () => {
-  try {
-    const raw = localStorage.getItem("amenities");
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object") return parsed;
-    }
-  } catch (e) {
-    console.warn("Failed to parse amenities from localStorage", e);
-  }
   return FALLBACK_AMENITIES;
 };
 

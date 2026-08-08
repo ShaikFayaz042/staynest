@@ -1,14 +1,38 @@
 ﻿import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { isListingSaved, toggleListingWishlist } from "../../utils/wishlist";
+import { getUserWishlistItems, createWishlist, deleteWishlist } from "../../api/wishlist";
 
 export default function ImageGallery({ list }) {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [saveToggle, setSaveToggle] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
-  const saved = isListingSaved(user?.id, list.id);
+  const [saved, setSaved] = useState(false);
+  const [wishlistItemId, setWishlistItemId] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function checkSaved() {
+      if (!user) {
+        if (mounted) setSaved(false);
+        return;
+      }
+      try {
+        const items = await getUserWishlistItems();
+        const listingKey = String(list._id || list.id);
+        const found = items.find((it) => String(it.listing) === listingKey);
+        if (mounted) {
+          setSaved(!!found);
+          setWishlistItemId(found?._id || null);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    checkSaved();
+    return () => { mounted = false; };
+  }, [user, list._id, list.id]);
 
   // Mobile carousel state
   const mobileRef = useRef(null);
@@ -22,7 +46,31 @@ export default function ImageGallery({ list }) {
       navigate("/login");
       return;
     }
-    toggleListingWishlist(user.id, list.id);
+    (async () => {
+      try {
+        if (!saved) {
+          const listingKey = list._id || list.id;
+          const created = await createWishlist(listingKey);
+          setSaved(true);
+          setWishlistItemId(created._id || created.id);
+        } else if (wishlistItemId) {
+          await deleteWishlist(wishlistItemId);
+          setSaved(false);
+          setWishlistItemId(null);
+        } else {
+          const items = await getUserWishlistItems();
+          const listingKey = String(list._id || list.id);
+          const found = items.find((it) => String(it.listing) === listingKey);
+          if (found) {
+            await deleteWishlist(found._id);
+            setSaved(false);
+            setWishlistItemId(null);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    })();
     setSaveToggle(!saveToggle);
   };
 

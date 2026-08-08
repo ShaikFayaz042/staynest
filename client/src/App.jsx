@@ -18,31 +18,8 @@ import WishlistsPage from './pages/WishlistsPage';
 import HostDashboardPage from './pages/HostDashboard';
 import HostMessagesPage from './pages/HostMessagesPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
-// Data
-import amenities from './data/amenities';
-import bookings from "./data/bookings";
-import categories from './data/categories';
-import listings from './data/listings';
-import locations from "./data/locations";
-import reviews from "./data/reviews";
-import users from './data/users';
 
 function App() {
-  useEffect(() => {
-    // Initialize localStorage with default data if not already done
-    if (!localStorage.getItem('app_initialized')) {
-      // store all data
-      localStorage.setItem("amenities", JSON.stringify(amenities));
-      localStorage.setItem("bookings", JSON.stringify(bookings));
-      localStorage.setItem("categories", JSON.stringify(categories));
-      localStorage.setItem("listings", JSON.stringify(listings));
-      localStorage.setItem("locations", JSON.stringify(locations));
-      localStorage.setItem("reviews", JSON.stringify(reviews));
-      localStorage.setItem("users", JSON.stringify(users));
-      localStorage.setItem("wishlists", JSON.stringify([]));
-      localStorage.setItem('app_initialized', 'true');
-    }
-  }, []);
 
   return (
     <ThemeProvider>

@@ -18,7 +18,7 @@ export async function getBookings(req, res) {
       filter.user = req.user.userId;
     }
 
-    let query = Booking.find(filter).populate("listing");
+    let query = Booking.find(filter).populate("listing").populate("user", "name email profile _id");
     const bookings = await query;
 
     res.status(200).json({
