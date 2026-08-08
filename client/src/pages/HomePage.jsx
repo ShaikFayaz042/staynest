@@ -3,7 +3,8 @@ import Footer from "../components/common/Footer";
 import Navbar from "../components/common/Navbar";
 import FilterBar, { defaultFilters } from "../components/home/FilterBar";
 import ListingGrid from "../components/home/ListingGrid";
-import introVideo from "../assets/videos/intro.mp4";
+
+const introVideo = "/videos/intro.mp4";
 
 export default function HomePage() {
   const [showIntroOverlay, setShowIntroOverlay] = useState(false);

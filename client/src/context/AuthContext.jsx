@@ -13,8 +13,10 @@ function normalizeUser(data) {
   };
 }
 
+const apiBaseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || '/api';
+
 async function authRequest(path, options = {}) {
-  const response = await fetch(`/api${path}`, {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',

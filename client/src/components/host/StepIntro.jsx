@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import HostFrame from "./HostFrame";
-import houseAnimation from "../../assets/videos/HouseAnimation.mp4";
+
+const houseAnimation = "/videos/HouseAnimation.mp4";
 
 export default function StepIntro({
   step = 1,
